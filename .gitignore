@@ -1,0 +1,22 @@
+// Ignore Virtual Environment
+// python -m venv venv to install virtual environment
+// pip install -r requirements.txt to install dependencies
+venv/
+
+// Ignore Python cache files
+__pycache__/
+
+// Ignore IDE specific files
+.vscode/
+
+// Ignore OS specific files
+.DS_Store
+
+// Ignore log files
+*.log
+
+// Ignore compiled files
+*.pyc
+
+// Ignore test output
+*.out
