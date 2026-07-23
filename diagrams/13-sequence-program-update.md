@@ -16,8 +16,8 @@ sequenceDiagram
     Repo->>DB: SELECT
     DB-->>Repo: row
     Repo-->>Svc: Program
-    alt authorized & state != ANNOUNCED & creator kept
-        Svc->>Svc: check requester in PROGRAMMERS; state != ANNOUNCED; creator kept in PROGRAMMERS
+    alt authorized and state is not ANNOUNCED and creator kept
+        Svc->>Svc: check requester in PROGRAMMERS, state != ANNOUNCED, creator kept in PROGRAMMERS
         Svc->>Repo: save(updatedProgram)
         Repo->>DB: UPDATE
         DB-->>Repo: OK

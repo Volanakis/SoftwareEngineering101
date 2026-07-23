@@ -16,14 +16,14 @@ sequenceDiagram
     Repo->>DB: SELECT ... WHERE name = ?
     DB-->>Repo: result
     Repo-->>Svc: exists : boolean
-    alt !exists (name is unique)
-        Svc->>Svc: validate required fields; generate id, creationDate; state = CREATED
+    alt name is unique
+        Svc->>Svc: validate required fields, generate id/creationDate, set state = CREATED
         Svc->>Repo: save(program, creator as PROGRAMMER)
         Repo->>DB: INSERT
         DB-->>Repo: OK
         Repo-->>Svc: saved Program
         Svc-->>Res: ProgramDTO (201 Created)
-    else exists (name already taken)
+    else name already taken
         Svc-->>Res: 409 Conflict
     end
     Res-->>User: HTTP response (201 + body, or 409 error)
