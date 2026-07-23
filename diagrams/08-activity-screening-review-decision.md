@@ -29,10 +29,10 @@ flowchart TD
     end
 
     Start((Start)) --> A1 --> S1 --> A2 --> S2 --> D1
-    D1 -->|reject| A4 --> S4 --> End1((End))
-    D1 -->|approve| S3 --> A6 --> S5 --> D2
-    D2 -->|no| S6 --> End2((End))
-    D2 -->|yes| D3
-    D3 -->|no| A8 --> End3((End))
-    D3 -->|yes| S7 --> End4((End))
+    D1 -->|"reject"| A4 --> S4 --> End1((End))
+    D1 -->|"approve"| S3 --> A6 --> S5 --> D2
+    D2 -->|"no"| S6 --> End2((End))
+    D2 -->|"yes"| D3
+    D3 -->|"no"| A8 --> End3((End))
+    D3 -->|"yes"| S7 --> End4((End))
 ```

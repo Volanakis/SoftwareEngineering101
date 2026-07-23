@@ -17,11 +17,11 @@ flowchart TD
     end
 
     Start((Start)) --> A1 --> A3 --> D1{Owner chooses:<br/>Update / Submit / Withdraw}
-    D1 -->|update| A2 -->|"loop while CREATED"| D1
-    D1 -->|withdraw| D3{state == CREATED?}
-    D3 -->|yes| A5 --> End1((End))
-    D3 -->|no n/a| End2((End))
-    D1 -->|submit| D2
-    D2 -->|yes| A6 --> End3((End))
-    D2 -->|no| E1 --> End4((End))
+    D1 -->|"update"| A2 -->|"loop while CREATED"| D1
+    D1 -->|"withdraw"| D3{state == CREATED?}
+    D3 -->|"yes"| A5 --> End1((End))
+    D3 -->|"no n/a"| End2((End))
+    D1 -->|"submit"| D2
+    D2 -->|"yes"| A6 --> End3((End))
+    D2 -->|"no"| E1 --> End4((End))
 ```

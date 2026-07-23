@@ -20,11 +20,11 @@ flowchart TD
     end
 
     Start((Start)) --> A1 --> D1
-    D1 -->|no| E1 --> End1((End))
-    D1 -->|yes| D2
-    D2 -->|no| E2 --> End2((End))
-    D2 -->|yes| A2 --> D3
-    D3 -->|yes| A3 --> A4
-    D3 -->|no| A4
+    D1 -->|"no"| E1 --> End1((End))
+    D1 -->|"yes"| D2
+    D2 -->|"no"| E2 --> End2((End))
+    D2 -->|"yes"| A2 --> D3
+    D3 -->|"yes"| A3 --> A4
+    D3 -->|"no"| A4
     A4 --> A5 --> End3((End))
 ```

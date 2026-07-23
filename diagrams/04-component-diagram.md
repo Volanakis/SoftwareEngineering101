@@ -32,19 +32,19 @@ flowchart TD
     DB[("Cinema Relational Database<br/>(Programs, Screenings, Users, ProgramRoles)")]
     Ext[["External User Management System"]]
 
-    Client -->|HTTPS/JSON| Auth
-    Auth -->|authorize| ProgRes
-    Auth -->|authorize| ScrRes
-    Rate -->|throttle| ScrRes
-    Auth -->|verify credentials| UserRepo
-    ProgRes -->|delegates| ProgSvc
-    ScrRes -->|delegates| ScrSvc
-    ScrSvc -->|reads program state| ProgSvc
-    ProgSvc -->|audit log, both services| Log
-    ProgSvc -->|persist| ProgRepo
-    ScrSvc -->|persist| ScrRepo
-    ProgRepo -->|SQL| DB
-    ScrRepo -->|SQL| DB
-    UserRepo -->|SQL| DB
-    UserRepo -->|sync / verify| Ext
+    Client -->|"HTTPS/JSON"| Auth
+    Auth -->|"authorize"| ProgRes
+    Auth -->|"authorize"| ScrRes
+    Rate -->|"throttle"| ScrRes
+    Auth -->|"verify credentials"| UserRepo
+    ProgRes -->|"delegates"| ProgSvc
+    ScrRes -->|"delegates"| ScrSvc
+    ScrSvc -->|"reads program state"| ProgSvc
+    ProgSvc -->|"audit log, both services"| Log
+    ProgSvc -->|"persist"| ProgRepo
+    ScrSvc -->|"persist"| ScrRepo
+    ProgRepo -->|"SQL"| DB
+    ScrRepo -->|"SQL"| DB
+    UserRepo -->|"SQL"| DB
+    UserRepo -->|"sync / verify"| Ext
 ```
