@@ -48,24 +48,28 @@
 
 ### Πλήρης λίστα αρχείων
 
-| Αρχείο | Τύπος | Τίτλος |
+Κάθε διάγραμμα υπάρχει σε **δύο μορφές**: το επεξεργάσιμο `.excalidraw` (για το excalidraw.com / VS Code extension) και ένα αντίστοιχο **`.md` με ενσωματωμένο Mermaid diagram**, ίδιου ονόματος, που αποδίδεται αυτόματα ως εικόνα μέσα στο GitHub, στο GitLab και στο preview του VS Code — χωρίς να χρειάζεται άνοιγμα του excalidraw. Όλα τα `.md` αρχεία έχουν επαληθευτεί ότι κάνουν parse/render σωστά με το `@mermaid-js/mermaid-cli`.
+
+| Αρχείο (.excalidraw / .md) | Τύπος | Τίτλος |
 |---|---|---|
-| `01-context-diagram.excalidraw` | Context | Πλαίσιο συστήματος |
-| `02-usecase-program-management.excalidraw` | Use Case | Διαχείριση Προγράμματος |
-| `03-usecase-screening-management.excalidraw` | Use Case | Διαχείριση Προβολών |
-| `04-component-diagram.excalidraw` | Component | Αρχιτεκτονική συστήματος |
-| `05-class-diagram.excalidraw` | Class | Οντότητες δεδομένων |
-| `06-activity-program-state-transitions.excalidraw` | Activity | Μεταβάσεις κατάστασης προγράμματος |
-| `07-activity-screening-submission.excalidraw` | Activity | Ροή υποβολής προβολής |
-| `08-activity-screening-review-decision.excalidraw` | Activity | Ροή αξιολόγησης → απόφασης προβολής |
-| `09-activity-program-search.excalidraw` | Activity | Αναζήτηση προγραμμάτων |
-| `10-activity-screening-search.excalidraw` | Activity | Αναζήτηση προβολών |
-| `11-sequence-program-creation.excalidraw` | Sequence | Δημιουργία προγράμματος |
-| `12-sequence-add-programmer-staff.excalidraw` | Sequence | Προσθήκη PROGRAMMER/STAFF |
-| `13-sequence-program-update.excalidraw` | Sequence | Ενημέρωση προγράμματος |
-| `14-sequence-program-view.excalidraw` | Sequence | Προβολή προγράμματος (redaction) |
-| `15-sequence-program-deletion.excalidraw` | Sequence | Διαγραφή προγράμματος |
-| `16-sequence-screening-view.excalidraw` | Sequence | Προβολή προβολής (redaction) |
+| `01-context-diagram` | Context | Πλαίσιο συστήματος |
+| `02-usecase-program-management` | Use Case | Διαχείριση Προγράμματος |
+| `03-usecase-screening-management` | Use Case | Διαχείριση Προβολών |
+| `04-component-diagram` | Component | Αρχιτεκτονική συστήματος |
+| `05-class-diagram` | Class | Οντότητες δεδομένων |
+| `06-activity-program-state-transitions` | Activity | Μεταβάσεις κατάστασης προγράμματος |
+| `07-activity-screening-submission` | Activity | Ροή υποβολής προβολής |
+| `08-activity-screening-review-decision` | Activity | Ροή αξιολόγησης → απόφασης προβολής |
+| `09-activity-program-search` | Activity | Αναζήτηση προγραμμάτων |
+| `10-activity-screening-search` | Activity | Αναζήτηση προβολών |
+| `11-sequence-program-creation` | Sequence | Δημιουργία προγράμματος |
+| `12-sequence-add-programmer-staff` | Sequence | Προσθήκη PROGRAMMER/STAFF |
+| `13-sequence-program-update` | Sequence | Ενημέρωση προγράμματος |
+| `14-sequence-program-view` | Sequence | Προβολή προγράμματος (redaction) |
+| `15-sequence-program-deletion` | Sequence | Διαγραφή προγράμματος |
+| `16-sequence-screening-view` | Sequence | Προβολή προβολής (redaction) |
+
+**Σημείωση για τα Mermaid `.md`**: το Mermaid δεν διαθέτει native τύπο για use case ή component diagrams, οπότε τα `02`, `03`, `04` αποδίδονται ως `flowchart` (actors/use cases ως κόμβοι, boundary ως subgraph) — σημασιολογικά ταυτόσημα με το `.excalidraw`, με αυτόματο (διαφορετικό) layout. Τα `05` (class), και `11`–`16` (sequence) χρησιμοποιούν τους αντίστοιχους **native** τύπους του Mermaid (`classDiagram`, `sequenceDiagram` με πραγματικά `alt` fragments), ενώ τα activity diagrams `06`–`10` αποδίδονται ως `flowchart` με `subgraph` για τα διαδικά (swimlanes).
 
 ---
 
