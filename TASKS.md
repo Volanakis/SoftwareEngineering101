@@ -12,7 +12,7 @@
 - [x] Poetry/requirements setup, config (`.env`, DB URL)
 - [x] `User` model + κοινό `auth.py` (έλεγχος login, `@requires_role` decorator) — ΜΛΑ-3.1, ΜΛΑ-3.2
 - [x] Συμφωνία API contract: URL paths, request/response JSON σχήματα, HTTP status codes για κάθε endpoint (γραπτά, πριν ξεκινήσετε να διαφοροποιείστε) — βλ. [`API_CONTRACT.md`](API_CONTRACT.md)
-- [ ] Κοινά pytest fixtures (test app, test DB, factory helpers για `User`)
+- [x] Κοινά pytest fixtures (test app, test DB, factory helpers για `User`)
 - [x] Διόρθωση `.github/workflows/pipelines.yaml`: `python-version: '16'` δεν είναι έγκυρη έκδοση Python (μπερδεύτηκε με Node) — αλλαγή σε έγκυρη έκδοση (π.χ. `'3.11'`)
 
 ---

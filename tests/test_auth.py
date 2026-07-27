@@ -3,12 +3,10 @@ from flask import Blueprint, jsonify
 
 from app import create_app
 from app.auth import authenticate, login_required, requires_role
-from app.extensions import db
-from app.models.user import User
 
 
 @pytest.fixture
-def app_context():
+def app():
     app = create_app("testing")
 
     bp = Blueprint("test_auth", __name__)
@@ -24,43 +22,30 @@ def app_context():
         return jsonify(ok=True)
 
     app.register_blueprint(bp)
-
-    with app.app_context():
-        db.create_all()
-        user = User(username="carol", full_name="Carol")
-        user.set_password("pw")
-        db.session.add(user)
-        db.session.commit()
-        yield app
-        db.session.remove()
-        db.drop_all()
+    return app
 
 
-@pytest.fixture
-def client(app_context):
-    return app_context.test_client()
-
-
-def _log_in_as_carol(app_context, client):
-    with app_context.app_context():
-        user = authenticate("carol", "pw")
-
+def _log_in(client, user):
     with client.session_transaction() as sess:
         sess["user_id"] = user.id
 
 
-def test_authenticate_valid_credentials(app_context):
+def test_authenticate_valid_credentials(db, user_factory):
+    user_factory(username="carol", password="pw")
+
     user = authenticate("carol", "pw")
 
     assert user is not None
     assert user.username == "carol"
 
 
-def test_authenticate_invalid_password(app_context):
+def test_authenticate_invalid_password(db, user_factory):
+    user_factory(username="carol", password="pw")
+
     assert authenticate("carol", "wrong") is None
 
 
-def test_authenticate_unknown_user(app_context):
+def test_authenticate_unknown_user(db):
     assert authenticate("nobody", "pw") is None
 
 
@@ -70,8 +55,9 @@ def test_login_required_rejects_anonymous(client):
     assert response.status_code == 401
 
 
-def test_login_required_allows_authenticated_user(app_context, client):
-    _log_in_as_carol(app_context, client)
+def test_login_required_allows_authenticated_user(db, user_factory, client):
+    user = user_factory()
+    _log_in(client, user)
 
     response = client.get("/protected")
 
@@ -84,8 +70,9 @@ def test_requires_role_rejects_visitor(client):
     assert response.status_code == 403
 
 
-def test_requires_role_allows_authenticated_user(app_context, client):
-    _log_in_as_carol(app_context, client)
+def test_requires_role_allows_authenticated_user(db, user_factory, client):
+    user = user_factory()
+    _log_in(client, user)
 
     response = client.get("/users-only")
 
