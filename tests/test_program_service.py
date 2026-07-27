@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 
-from app.models.program import ProgramState
+from app.models.program import Program, ProgramState
 from app.services.errors import AuthorizationError, ConflictError, NotFoundError, ValidationError
 from app.services.program_service import ProgramService
 
@@ -333,3 +333,39 @@ def test_get_program_redacted_for_anonymous_visitor(db, user_factory, service):
 def test_get_program_unknown_id_raises_not_found(db, service):
     with pytest.raises(NotFoundError):
         service.get_program("does-not-exist", None)
+
+
+def test_delete_program_removes_it_while_created(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+    program_id = program.id
+
+    service.delete_program(program_id, creator)
+
+    assert db.session.get(Program, program_id) is None
+
+
+def test_delete_program_rejects_non_programmer(db, user_factory, service):
+    creator = user_factory(username="creator")
+    outsider = user_factory(username="outsider")
+    program = service.create_program(_valid_data(), creator)
+
+    with pytest.raises(AuthorizationError):
+        service.delete_program(program.id, outsider)
+
+
+def test_delete_program_rejects_when_not_created(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+    program.state = ProgramState.SUBMISSION
+    db.session.commit()
+
+    with pytest.raises(ConflictError):
+        service.delete_program(program.id, creator)
+
+
+def test_delete_program_unknown_id_raises_not_found(db, user_factory, service):
+    creator = user_factory(username="creator")
+
+    with pytest.raises(NotFoundError):
+        service.delete_program("does-not-exist", creator)

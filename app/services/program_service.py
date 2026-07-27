@@ -163,6 +163,21 @@ class ProgramService:
 
         return [_serialize_program(program, requester) for program in programs]
 
+    def delete_program(self, program_id, requester):
+        """ΛΑ-2.7: only a PROGRAMMER of the program, and only while state == CREATED."""
+        program = db.session.get(Program, program_id)
+        if program is None:
+            raise NotFoundError(f"Program '{program_id}' not found")
+
+        if requester not in program.programmers:
+            raise AuthorizationError("Only a PROGRAMMER of this program can delete it")
+
+        if program.state != ProgramState.CREATED:
+            raise ConflictError("Program can only be deleted while in CREATED state")
+
+        db.session.delete(program)
+        db.session.commit()
+
 
 def _as_date(value):
     return date.fromisoformat(value) if isinstance(value, str) else value
