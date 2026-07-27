@@ -14,6 +14,12 @@ def create_app(config_name=None):
     app = Flask(__name__)
     app.config.from_object(config_by_name[config_name])
 
+    from app.extensions import db
+
+    db.init_app(app)
+
+    from app import models  # noqa: F401  (registers models on db.metadata)
+
     @app.get("/health")
     def health():
         return {"status": "ok"}
