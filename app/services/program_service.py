@@ -2,6 +2,7 @@ from datetime import date
 
 from app.extensions import db
 from app.models.program import Program, ProgramRole, ProgramState, RoleType
+from app.models.user import User
 from app.services.errors import AuthorizationError, ConflictError, NotFoundError, ValidationError
 
 REQUIRED_CREATE_FIELDS = ("name", "description", "startDate", "endDate")
@@ -71,6 +72,52 @@ class ProgramService:
 
         db.session.commit()
         return program
+
+    def add_programmer(self, program_id, user_id, requester):
+        """ΛΑ-2.3: add a PROGRAMMER; the user must not already hold a role in this program."""
+        program, user = self._require_programmer_and_target_user(program_id, user_id, requester)
+        self._ensure_user_has_no_role(program, user)
+
+        db.session.add(ProgramRole(program=program, user=user, role_type=RoleType.PROGRAMMER))
+        db.session.commit()
+        return program
+
+    def add_staff(self, program_id, user_id, requester):
+        """ΛΑ-2.4: add STAFF; frozen once the program leaves CREATED (enters SUBMISSION+)."""
+        program, user = self._require_programmer_and_target_user(program_id, user_id, requester)
+
+        if program.state != ProgramState.CREATED:
+            raise ConflictError("STAFF set is frozen once the program leaves CREATED")
+
+        self._ensure_user_has_no_role(program, user)
+
+        db.session.add(ProgramRole(program=program, user=user, role_type=RoleType.STAFF))
+        db.session.commit()
+        return program
+
+    def _require_programmer_and_target_user(self, program_id, user_id, requester):
+        program = db.session.get(Program, program_id)
+        if program is None:
+            raise NotFoundError(f"Program '{program_id}' not found")
+
+        if requester not in program.programmers:
+            raise AuthorizationError("Only a PROGRAMMER of this program can add roles")
+
+        if program.state == ProgramState.ANNOUNCED:
+            raise ConflictError("Program is ANNOUNCED and can no longer be updated")
+
+        user = db.session.get(User, user_id)
+        if user is None:
+            raise NotFoundError(f"User '{user_id}' not found")
+
+        return program, user
+
+    def _ensure_user_has_no_role(self, program, user):
+        existing = ProgramRole.query.filter_by(program_id=program.id, user_id=user.id).first()
+        if existing is not None:
+            raise ConflictError(
+                f"User '{user.id}' already has role {existing.role_type.value} in this program"
+            )
 
 
 def _as_date(value):

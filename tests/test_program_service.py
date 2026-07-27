@@ -107,3 +107,108 @@ def test_update_program_unknown_id_raises_not_found(db, user_factory, service):
 
     with pytest.raises(NotFoundError):
         service.update_program("does-not-exist", {"description": "x"}, creator)
+
+
+def test_add_programmer_success(db, user_factory, service):
+    creator = user_factory(username="creator")
+    new_programmer = user_factory(username="new-programmer")
+    program = service.create_program(_valid_data(), creator)
+
+    updated = service.add_programmer(program.id, new_programmer.id, creator)
+
+    assert set(updated.programmers) == {creator, new_programmer}
+
+
+def test_add_programmer_rejects_non_programmer_requester(db, user_factory, service):
+    creator = user_factory(username="creator")
+    outsider = user_factory(username="outsider")
+    target = user_factory(username="target")
+    program = service.create_program(_valid_data(), creator)
+
+    with pytest.raises(AuthorizationError):
+        service.add_programmer(program.id, target.id, outsider)
+
+
+def test_add_programmer_rejects_user_already_programmer(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+
+    with pytest.raises(ConflictError):
+        service.add_programmer(program.id, creator.id, creator)
+
+
+def test_add_programmer_rejects_user_already_staff(db, user_factory, service):
+    creator = user_factory(username="creator")
+    staff_member = user_factory(username="staffer")
+    program = service.create_program(_valid_data(), creator)
+    service.add_staff(program.id, staff_member.id, creator)
+
+    with pytest.raises(ConflictError):
+        service.add_programmer(program.id, staff_member.id, creator)
+
+
+def test_add_programmer_rejects_when_announced(db, user_factory, service):
+    creator = user_factory(username="creator")
+    target = user_factory(username="target")
+    program = service.create_program(_valid_data(), creator)
+    program.state = ProgramState.ANNOUNCED
+    db.session.commit()
+
+    with pytest.raises(ConflictError):
+        service.add_programmer(program.id, target.id, creator)
+
+
+def test_add_programmer_unknown_program_raises_not_found(db, user_factory, service):
+    creator = user_factory(username="creator")
+
+    with pytest.raises(NotFoundError):
+        service.add_programmer("does-not-exist", creator.id, creator)
+
+
+def test_add_programmer_unknown_user_raises_not_found(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+
+    with pytest.raises(NotFoundError):
+        service.add_programmer(program.id, "does-not-exist", creator)
+
+
+def test_add_staff_success_while_created(db, user_factory, service):
+    creator = user_factory(username="creator")
+    staff_member = user_factory(username="staffer")
+    program = service.create_program(_valid_data(), creator)
+
+    updated = service.add_staff(program.id, staff_member.id, creator)
+
+    assert updated.staff == [staff_member]
+
+
+def test_add_staff_rejects_once_program_left_created(db, user_factory, service):
+    creator = user_factory(username="creator")
+    staff_member = user_factory(username="staffer")
+    program = service.create_program(_valid_data(), creator)
+    program.state = ProgramState.SUBMISSION
+    db.session.commit()
+
+    with pytest.raises(ConflictError):
+        service.add_staff(program.id, staff_member.id, creator)
+
+
+def test_add_staff_rejects_user_already_staff(db, user_factory, service):
+    creator = user_factory(username="creator")
+    staff_member = user_factory(username="staffer")
+    program = service.create_program(_valid_data(), creator)
+    service.add_staff(program.id, staff_member.id, creator)
+
+    with pytest.raises(ConflictError):
+        service.add_staff(program.id, staff_member.id, creator)
+
+
+def test_add_staff_rejects_non_programmer_requester(db, user_factory, service):
+    creator = user_factory(username="creator")
+    outsider = user_factory(username="outsider")
+    target = user_factory(username="target")
+    program = service.create_program(_valid_data(), creator)
+
+    with pytest.raises(AuthorizationError):
+        service.add_staff(program.id, target.id, outsider)
