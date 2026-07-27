@@ -3,7 +3,7 @@ from datetime import date
 import pytest
 
 from app.models.program import ProgramState
-from app.services.errors import ConflictError, ValidationError
+from app.services.errors import AuthorizationError, ConflictError, NotFoundError, ValidationError
 from app.services.program_service import ProgramService
 
 
@@ -52,3 +52,58 @@ def test_create_program_duplicate_name(db, user_factory, service):
 
     with pytest.raises(ConflictError):
         service.create_program(_valid_data(), creator)
+
+
+def test_update_program_applies_partial_changes(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+
+    updated = service.update_program(
+        program.id, {"description": "Updated description"}, creator
+    )
+
+    assert updated.description == "Updated description"
+    assert updated.name == "Spring Season"
+
+
+def test_update_program_rejects_non_programmer(db, user_factory, service):
+    creator = user_factory(username="creator")
+    outsider = user_factory(username="outsider")
+    program = service.create_program(_valid_data(), creator)
+
+    with pytest.raises(AuthorizationError):
+        service.update_program(program.id, {"description": "Nope"}, outsider)
+
+
+def test_update_program_rejects_when_announced(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+    program.state = ProgramState.ANNOUNCED
+    db.session.commit()
+
+    with pytest.raises(ConflictError):
+        service.update_program(program.id, {"description": "Nope"}, creator)
+
+
+def test_update_program_rejects_empty_name(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+
+    with pytest.raises(ValidationError):
+        service.update_program(program.id, {"name": ""}, creator)
+
+
+def test_update_program_rejects_duplicate_name(db, user_factory, service):
+    creator = user_factory(username="creator")
+    service.create_program(_valid_data(name="Autumn Season"), creator)
+    program = service.create_program(_valid_data(name="Spring Season"), creator)
+
+    with pytest.raises(ConflictError):
+        service.update_program(program.id, {"name": "Autumn Season"}, creator)
+
+
+def test_update_program_unknown_id_raises_not_found(db, user_factory, service):
+    creator = user_factory(username="creator")
+
+    with pytest.raises(NotFoundError):
+        service.update_program("does-not-exist", {"description": "x"}, creator)
