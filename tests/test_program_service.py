@@ -3,8 +3,19 @@ from datetime import date
 import pytest
 
 from app.models.program import Program, ProgramState
+from app.services import program_service as program_service_module
 from app.services.errors import AuthorizationError, ConflictError, NotFoundError, ValidationError
 from app.services.program_service import ProgramService
+
+FULL_TRANSITION_SEQUENCE = [
+    ProgramState.SUBMISSION,
+    ProgramState.ASSIGNMENT,
+    ProgramState.REVIEW,
+    ProgramState.SCHEDULING,
+    ProgramState.FINAL_SUBMISSION,
+    ProgramState.DECISION,
+    ProgramState.ANNOUNCED,
+]
 
 
 @pytest.fixture
@@ -369,3 +380,77 @@ def test_delete_program_unknown_id_raises_not_found(db, user_factory, service):
 
     with pytest.raises(NotFoundError):
         service.delete_program("does-not-exist", creator)
+
+
+def test_transition_program_full_sequence(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+
+    for target in FULL_TRANSITION_SEQUENCE:
+        program = service.transition_program(program.id, target.value, creator)
+        assert program.state == target
+
+
+def test_transition_program_rejects_skip(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+
+    with pytest.raises(ConflictError):
+        service.transition_program(program.id, ProgramState.ASSIGNMENT.value, creator)
+
+
+def test_transition_program_rejects_rollback(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+    service.transition_program(program.id, ProgramState.SUBMISSION.value, creator)
+
+    with pytest.raises(ConflictError):
+        service.transition_program(program.id, ProgramState.CREATED.value, creator)
+
+
+def test_transition_program_rejects_non_programmer(db, user_factory, service):
+    creator = user_factory(username="creator")
+    outsider = user_factory(username="outsider")
+    program = service.create_program(_valid_data(), creator)
+
+    with pytest.raises(AuthorizationError):
+        service.transition_program(program.id, ProgramState.SUBMISSION.value, outsider)
+
+
+def test_transition_program_rejects_once_announced(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+    for target in FULL_TRANSITION_SEQUENCE:
+        service.transition_program(program.id, target.value, creator)
+
+    with pytest.raises(ConflictError):
+        service.transition_program(program.id, ProgramState.ANNOUNCED.value, creator)
+
+
+def test_transition_program_rejects_unknown_target_state(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+
+    with pytest.raises(ValidationError):
+        service.transition_program(program.id, "NOT_A_STATE", creator)
+
+
+def test_transition_program_unknown_program_raises_not_found(db, user_factory, service):
+    creator = user_factory(username="creator")
+
+    with pytest.raises(NotFoundError):
+        service.transition_program("does-not-exist", ProgramState.SUBMISSION.value, creator)
+
+
+def test_transition_program_decision_runs_registered_hooks(
+    db, user_factory, service, monkeypatch
+):
+    calls = []
+    monkeypatch.setattr(program_service_module, "_decision_transition_hooks", [calls.append])
+
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+    for target in FULL_TRANSITION_SEQUENCE[:-1]:  # up to and including DECISION
+        service.transition_program(program.id, target.value, creator)
+
+    assert calls == [program]

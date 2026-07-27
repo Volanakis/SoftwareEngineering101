@@ -7,6 +7,28 @@ from app.services.errors import AuthorizationError, ConflictError, NotFoundError
 
 REQUIRED_CREATE_FIELDS = ("name", "description", "startDate", "endDate")
 
+# ΛΑ-2.8: strictly sequential lifecycle, no rollback or skipping a step.
+PROGRAM_STATE_ORDER = [
+    ProgramState.CREATED,
+    ProgramState.SUBMISSION,
+    ProgramState.ASSIGNMENT,
+    ProgramState.REVIEW,
+    ProgramState.SCHEDULING,
+    ProgramState.FINAL_SUBMISSION,
+    ProgramState.DECISION,
+    ProgramState.ANNOUNCED,
+]
+
+# ΛΑ-2.8.6: entering DECISION must auto-reject APPROVED-but-not-finally-submitted
+# screenings. ProgramService has no dependency on the Screening model (Person B), so
+# that behavior is wired in via this hook registry instead of a direct import.
+_decision_transition_hooks = []
+
+
+def register_decision_hook(hook):
+    """Register callable(program) to run when a program transitions into DECISION."""
+    _decision_transition_hooks.append(hook)
+
 
 class ProgramService:
     def create_program(self, data, creator):
@@ -177,6 +199,47 @@ class ProgramService:
 
         db.session.delete(program)
         db.session.commit()
+
+    def transition_program(self, program_id, target_state, requester):
+        """ΛΑ-2.8: only a PROGRAMMER may transition, and only to the single next state
+        in the fixed sequence (no rollback, no skipping)."""
+        program = db.session.get(Program, program_id)
+        if program is None:
+            raise NotFoundError(f"Program '{program_id}' not found")
+
+        if requester not in program.programmers:
+            raise AuthorizationError(
+                "Only a PROGRAMMER of this program can transition its state"
+            )
+
+        try:
+            target = (
+                target_state
+                if isinstance(target_state, ProgramState)
+                else ProgramState(target_state)
+            )
+        except ValueError:
+            raise ValidationError(f"Unknown target state '{target_state}'")
+
+        current_index = PROGRAM_STATE_ORDER.index(program.state)
+        if current_index == len(PROGRAM_STATE_ORDER) - 1:
+            raise ConflictError("Program is already in its final state (ANNOUNCED)")
+
+        next_state = PROGRAM_STATE_ORDER[current_index + 1]
+        if target != next_state:
+            raise ConflictError(
+                f"Invalid transition: '{program.state.value}' can only move to "
+                f"'{next_state.value}' next (no rollback or skip)"
+            )
+
+        program.state = next_state
+
+        if next_state == ProgramState.DECISION:
+            for hook in _decision_transition_hooks:
+                hook(program)
+
+        db.session.commit()
+        return program
 
 
 def _as_date(value):

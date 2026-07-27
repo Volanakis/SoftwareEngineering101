@@ -28,7 +28,7 @@
 - [x] `search_programs` — φίλτρα AND, redaction ανά ρόλο, ταξινόμηση date→name (ΛΑ-2.5, activity `09`)
 - [x] `get_program` — redaction ανά ρόλο (ΛΑ-2.6, sequence `14`)
 - [x] `delete_program` — μόνο PROGRAMMER + state CREATED (ΛΑ-2.7, sequence `15`)
-- [ ] State machine 7 μεταβάσεων, χωρίς rollback/skip, auto-reject στο DECISION (ΛΑ-2.8, activity `06`)
+- [x] State machine 7 μεταβάσεων, χωρίς rollback/skip, auto-reject στο DECISION (ΛΑ-2.8, activity `06`)
 - [ ] Flask Blueprint endpoints (sequence diagrams `11`–`15`)
 - [ ] Unit tests: κάθε function + edge cases (μη έγκυρες μεταβάσεις, μη εξουσιοδοτημένος χρήστης, διπλό όνομα)
 
