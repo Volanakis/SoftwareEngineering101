@@ -16,7 +16,7 @@
 
 ## Δομή Εργασιών
 
-Δείτε το [`TASKS.md`](TASKS.md) για τον πλήρη καταμερισμό εργασιών ανά άτομο (Person A: Program Management, Person B: Screening Management) και τις φάσεις υλοποίησης.
+Δείτε το [`TASKS.md`](TASKS.md) για τον πλήρη καταμερισμό εργασιών ανά άτομο (Person A: Program Management, Person B: Screening Management) και τις φάσεις υλοποίησης, και το [`API_CONTRACT.md`](API_CONTRACT.md) για τα συμφωνημένα endpoints (URL paths, JSON σχήματα, status codes) πριν ξεκινήσετε να υλοποιείτε το δικό σας module.
 
 ## Πριν ανοίξετε PR
 
