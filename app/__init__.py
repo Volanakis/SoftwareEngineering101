@@ -20,6 +20,10 @@ def create_app(config_name=None):
 
     from app import models  # noqa: F401  (registers models on db.metadata)
 
+    from app.blueprints.programs import programs_bp
+
+    app.register_blueprint(programs_bp)
+
     @app.get("/health")
     def health():
         return {"status": "ok"}
