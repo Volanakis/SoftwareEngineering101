@@ -212,3 +212,84 @@ def test_add_staff_rejects_non_programmer_requester(db, user_factory, service):
 
     with pytest.raises(AuthorizationError):
         service.add_staff(program.id, target.id, outsider)
+
+
+def test_search_programs_returns_all_when_no_criteria(db, user_factory, service):
+    creator = user_factory(username="creator")
+    service.create_program(_valid_data(name="Spring", startDate="2026-03-01"), creator)
+    service.create_program(_valid_data(name="Autumn", startDate="2026-09-01"), creator)
+
+    results = service.search_programs({}, creator)
+
+    assert [p["name"] for p in results] == ["Spring", "Autumn"]
+
+
+def test_search_programs_sorts_by_date_then_name(db, user_factory, service):
+    creator = user_factory(username="creator")
+    service.create_program(
+        _valid_data(name="B", startDate="2026-01-01", endDate="2026-02-01"), creator
+    )
+    service.create_program(
+        _valid_data(name="A", startDate="2026-01-01", endDate="2026-02-01"), creator
+    )
+    service.create_program(
+        _valid_data(name="C", startDate="2025-01-01", endDate="2025-02-01"), creator
+    )
+
+    results = service.search_programs({}, creator)
+
+    assert [p["name"] for p in results] == ["C", "A", "B"]
+
+
+def test_search_programs_filters_by_name_and_description_with_and_semantics(
+    db, user_factory, service
+):
+    creator = user_factory(username="creator")
+    service.create_program(
+        _valid_data(name="Spring Classics", description="Old films"), creator
+    )
+    service.create_program(
+        _valid_data(name="Spring Indie", description="New films"), creator
+    )
+
+    results = service.search_programs({"name": "spring", "description": "old"}, creator)
+
+    assert [p["name"] for p in results] == ["Spring Classics"]
+
+
+def test_search_programs_filters_by_date_range(db, user_factory, service):
+    creator = user_factory(username="creator")
+    service.create_program(
+        _valid_data(name="Early", startDate="2026-01-01", endDate="2026-02-01"), creator
+    )
+    service.create_program(
+        _valid_data(name="Late", startDate="2026-11-01", endDate="2026-12-01"), creator
+    )
+
+    results = service.search_programs({"startDateFrom": "2026-06-01"}, creator)
+
+    assert [p["name"] for p in results] == ["Late"]
+
+
+def test_search_programs_redacts_for_outsider(db, user_factory, service):
+    creator = user_factory(username="creator")
+    outsider = user_factory(username="outsider")
+    service.create_program(_valid_data(), creator)
+
+    results = service.search_programs({}, outsider)
+
+    assert "programmers" not in results[0]
+    assert "staff" not in results[0]
+    assert "creationDate" not in results[0]
+
+
+def test_search_programs_full_detail_for_programmer(db, user_factory, service):
+    creator = user_factory(username="creator")
+    service.create_program(_valid_data(), creator)
+
+    results = service.search_programs({}, creator)
+
+    assert results[0]["programmers"] == [
+        {"id": creator.id, "username": creator.username, "fullName": creator.full_name}
+    ]
+    assert "creationDate" in results[0]
