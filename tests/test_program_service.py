@@ -293,3 +293,43 @@ def test_search_programs_full_detail_for_programmer(db, user_factory, service):
         {"id": creator.id, "username": creator.username, "fullName": creator.full_name}
     ]
     assert "creationDate" in results[0]
+
+
+def test_get_program_full_detail_for_programmer(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+
+    dto = service.get_program(program.id, creator)
+
+    assert dto["name"] == "Spring Season"
+    assert dto["programmers"] == [
+        {"id": creator.id, "username": creator.username, "fullName": creator.full_name}
+    ]
+    assert "creationDate" in dto
+
+
+def test_get_program_redacted_for_outsider(db, user_factory, service):
+    creator = user_factory(username="creator")
+    outsider = user_factory(username="outsider")
+    program = service.create_program(_valid_data(), creator)
+
+    dto = service.get_program(program.id, outsider)
+
+    assert dto["name"] == "Spring Season"
+    assert "programmers" not in dto
+    assert "staff" not in dto
+    assert "creationDate" not in dto
+
+
+def test_get_program_redacted_for_anonymous_visitor(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+
+    dto = service.get_program(program.id, None)
+
+    assert "programmers" not in dto
+
+
+def test_get_program_unknown_id_raises_not_found(db, service):
+    with pytest.raises(NotFoundError):
+        service.get_program("does-not-exist", None)

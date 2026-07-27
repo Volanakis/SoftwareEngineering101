@@ -119,6 +119,14 @@ class ProgramService:
                 f"User '{user.id}' already has role {existing.role_type.value} in this program"
             )
 
+    def get_program(self, program_id, requester):
+        """ΛΑ-2.6: view a program, redacted per the requester's role."""
+        program = db.session.get(Program, program_id)
+        if program is None:
+            raise NotFoundError(f"Program '{program_id}' not found")
+
+        return _serialize_program(program, requester)
+
     def search_programs(self, filters, requester):
         """ΛΑ-2.5: AND-combined filters, redacted per role, sorted by date then name.
 
