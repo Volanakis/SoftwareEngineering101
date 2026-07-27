@@ -243,7 +243,12 @@ class ProgramService:
 
 
 def _as_date(value):
-    return date.fromisoformat(value) if isinstance(value, str) else value
+    if not isinstance(value, str):
+        return value
+    try:
+        return date.fromisoformat(value)
+    except ValueError:
+        raise ValidationError(f"'{value}' is not a valid ISO date (YYYY-MM-DD)")
 
 
 def _is_insider(program, requester):

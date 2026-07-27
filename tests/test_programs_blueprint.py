@@ -236,3 +236,70 @@ def test_transition_program_missing_target_state_returns_400(db, user_factory, c
     response = client.post(f"/programs/{created['id']}/transitions", json={})
 
     assert response.status_code == 400
+
+
+def test_transition_program_forbidden_for_non_programmer(db, user_factory, client):
+    creator = user_factory(username="creator")
+    outsider = user_factory(username="outsider")
+    _log_in(client, creator)
+    created = client.post("/programs", json=_valid_payload()).get_json()
+
+    _log_in(client, outsider)
+    response = client.post(
+        f"/programs/{created['id']}/transitions", json={"targetState": "SUBMISSION"}
+    )
+
+    assert response.status_code == 403
+
+
+def test_get_program_full_detail_for_programmer(db, user_factory, client):
+    creator = user_factory(username="creator")
+    _log_in(client, creator)
+    created = client.post("/programs", json=_valid_payload()).get_json()
+
+    response = client.get(f"/programs/{created['id']}")
+
+    body = response.get_json()
+    assert [p["username"] for p in body["programmers"]] == ["creator"]
+    assert "creationDate" in body
+
+
+def test_update_program_not_found_returns_404(db, user_factory, client):
+    creator = user_factory(username="creator")
+    _log_in(client, creator)
+
+    response = client.put("/programs/does-not-exist", json={"description": "x"})
+
+    assert response.status_code == 404
+
+
+def test_delete_program_not_found_returns_404(db, user_factory, client):
+    creator = user_factory(username="creator")
+    _log_in(client, creator)
+
+    response = client.delete("/programs/does-not-exist")
+
+    assert response.status_code == 404
+
+
+def test_add_role_program_not_found_returns_404(db, user_factory, client):
+    creator = user_factory(username="creator")
+    _log_in(client, creator)
+
+    response = client.post(
+        "/programs/does-not-exist/roles",
+        json={"userId": creator.id, "roleType": "PROGRAMMER"},
+    )
+
+    assert response.status_code == 404
+
+
+def test_transition_program_not_found_returns_404(db, user_factory, client):
+    creator = user_factory(username="creator")
+    _log_in(client, creator)
+
+    response = client.post(
+        "/programs/does-not-exist/transitions", json={"targetState": "SUBMISSION"}
+    )
+
+    assert response.status_code == 404
