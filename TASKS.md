@@ -9,7 +9,7 @@
 ## Phase 0 — Μαζί, πριν διαχωριστείτε (~μισή μέρα)
 
 - [x] Flask app factory + δομή φακέλων: `app/models/`, `app/services/`, `app/blueprints/`, `tests/`
-- [ ] Poetry/requirements setup, config (`.env`, DB URL)
+- [x] Poetry/requirements setup, config (`.env`, DB URL)
 - [ ] `User` model + κοινό `auth.py` (έλεγχος login, `@requires_role` decorator) — ΜΛΑ-3.1, ΜΛΑ-3.2
 - [ ] Συμφωνία API contract: URL paths, request/response JSON σχήματα, HTTP status codes για κάθε endpoint (γραπτά, πριν ξεκινήσετε να διαφοροποιείστε)
 - [ ] Κοινά pytest fixtures (test app, test DB, factory helpers για `User`)
