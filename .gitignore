@@ -20,3 +20,6 @@ __pycache__/
 
 // Ignore test output
 *.out
+
+// Ignore local environment variables
+.env
