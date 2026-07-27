@@ -21,7 +21,7 @@
 
 Αρχεία: `models/program.py`, `services/program_service.py`, `blueprints/programs.py`, `tests/test_program*.py`
 
-- [ ] `Program` + `ProgramRole` μοντέλα SQLAlchemy (class diagram `05`)
+- [x] `Program` + `ProgramRole` μοντέλα SQLAlchemy (class diagram `05`)
 - [ ] `ProgramService.create_program` — μοναδικότητα name, auto id/creationDate, creator → PROGRAMMER (ΛΑ-2.1)
 - [ ] `ProgramService.update_program` — έλεγχος PROGRAMMER, state != ANNOUNCED, creator παραμένει (ΛΑ-2.2)
 - [ ] `add_programmer` / `add_staff` — έλεγχοι διπλοεγγραφής, πάγωμα STAFF μετά SUBMISSION (ΛΑ-2.3, ΛΑ-2.4)
