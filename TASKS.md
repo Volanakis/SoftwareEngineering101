@@ -23,7 +23,7 @@
 
 - [x] `Program` + `ProgramRole` μοντέλα SQLAlchemy (class diagram `05`)
 - [x] `ProgramService.create_program` — μοναδικότητα name, auto id/creationDate, creator → PROGRAMMER (ΛΑ-2.1)
-- [ ] `ProgramService.update_program` — έλεγχος PROGRAMMER, state != ANNOUNCED, creator παραμένει (ΛΑ-2.2)
+- [x] `ProgramService.update_program` — έλεγχος PROGRAMMER, state != ANNOUNCED, creator παραμένει (ΛΑ-2.2)
 - [ ] `add_programmer` / `add_staff` — έλεγχοι διπλοεγγραφής, πάγωμα STAFF μετά SUBMISSION (ΛΑ-2.3, ΛΑ-2.4)
 - [ ] `search_programs` — φίλτρα AND, redaction ανά ρόλο, ταξινόμηση date→name (ΛΑ-2.5, activity `09`)
 - [ ] `get_program` — redaction ανά ρόλο (ΛΑ-2.6, sequence `14`)
