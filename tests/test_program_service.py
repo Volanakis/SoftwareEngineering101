@@ -454,3 +454,47 @@ def test_transition_program_decision_runs_registered_hooks(
         service.transition_program(program.id, target.value, creator)
 
     assert calls == [program]
+
+
+def test_create_program_rejects_malformed_date(db, user_factory, service):
+    creator = user_factory(username="creator")
+
+    with pytest.raises(ValidationError):
+        service.create_program(_valid_data(startDate="not-a-date"), creator)
+
+
+def test_update_program_rejects_malformed_date(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+
+    with pytest.raises(ValidationError):
+        service.update_program(program.id, {"endDate": "also-not-a-date"}, creator)
+
+
+def test_update_program_applies_date_changes(db, user_factory, service):
+    creator = user_factory(username="creator")
+    program = service.create_program(_valid_data(), creator)
+
+    updated = service.update_program(
+        program.id, {"startDate": "2026-02-01", "endDate": "2026-07-01"}, creator
+    )
+
+    assert updated.start_date == date(2026, 2, 1)
+    assert updated.end_date == date(2026, 7, 1)
+
+
+def test_search_programs_rejects_malformed_date_filter(db, user_factory, service):
+    creator = user_factory(username="creator")
+    service.create_program(_valid_data(), creator)
+
+    with pytest.raises(ValidationError):
+        service.search_programs({"startDateFrom": "not-a-date"}, creator)
+
+
+def test_search_programs_no_match_returns_empty_list(db, user_factory, service):
+    creator = user_factory(username="creator")
+    service.create_program(_valid_data(), creator)
+
+    results = service.search_programs({"name": "nonexistent"}, creator)
+
+    assert results == []

@@ -6,7 +6,7 @@
 
 ---
 
-## Phase 0 — Μαζί, πριν διαχωριστείτε (~μισή μέρα)
+## Phase 0 — Μαζί (~μισή μέρα)
 
 - [x] Flask app factory + δομή φακέλων: `app/models/`, `app/services/`, `app/blueprints/`, `tests/`
 - [x] Poetry/requirements setup, config (`.env`, DB URL)
@@ -30,7 +30,7 @@
 - [x] `delete_program` — μόνο PROGRAMMER + state CREATED (ΛΑ-2.7, sequence `15`)
 - [x] State machine 7 μεταβάσεων, χωρίς rollback/skip, auto-reject στο DECISION (ΛΑ-2.8, activity `06`)
 - [x] Flask Blueprint endpoints (sequence diagrams `11`–`15`)
-- [ ] Unit tests: κάθε function + edge cases (μη έγκυρες μεταβάσεις, μη εξουσιοδοτημένος χρήστης, διπλό όνομα)
+- [x] Unit tests: κάθε function + edge cases (μη έγκυρες μεταβάσεις, μη εξουσιοδοτημένος χρήστης, διπλό όνομα)
 
 ## Person B — Διαχείριση Προβολών (Screening Management)
 
@@ -49,7 +49,7 @@
 
 ---
 
-## Cross-cutting (μοιράστε ό,τι μείνει)
+## Cross-cutting
 
 - [ ] Rate limiting με Flask-Limiter σε submission/search endpoints (ΜΛΑ-3.3)
 - [ ] Logging & audit trail component (ΜΛΑ-5)
