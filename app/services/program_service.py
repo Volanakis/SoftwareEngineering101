@@ -119,9 +119,98 @@ class ProgramService:
                 f"User '{user.id}' already has role {existing.role_type.value} in this program"
             )
 
+    def get_program(self, program_id, requester):
+        """ΛΑ-2.6: view a program, redacted per the requester's role."""
+        program = db.session.get(Program, program_id)
+        if program is None:
+            raise NotFoundError(f"Program '{program_id}' not found")
+
+        return _serialize_program(program, requester)
+
+    def search_programs(self, filters, requester):
+        """ΛΑ-2.5: AND-combined filters, redacted per role, sorted by date then name.
+
+        `filmTitle`/`auditorium` filters from API_CONTRACT.md depend on the Screening
+        model (Person B) and are not applied yet; they are accepted but ignored here.
+        """
+        query = Program.query
+
+        name = filters.get("name")
+        if name:
+            query = query.filter(Program.name.ilike(f"%{name}%"))
+
+        description = filters.get("description")
+        if description:
+            query = query.filter(Program.description.ilike(f"%{description}%"))
+
+        start_date_from = filters.get("startDateFrom")
+        if start_date_from:
+            query = query.filter(Program.start_date >= _as_date(start_date_from))
+
+        start_date_to = filters.get("startDateTo")
+        if start_date_to:
+            query = query.filter(Program.start_date <= _as_date(start_date_to))
+
+        end_date_from = filters.get("endDateFrom")
+        if end_date_from:
+            query = query.filter(Program.end_date >= _as_date(end_date_from))
+
+        end_date_to = filters.get("endDateTo")
+        if end_date_to:
+            query = query.filter(Program.end_date <= _as_date(end_date_to))
+
+        programs = query.order_by(Program.start_date.asc(), Program.name.asc()).all()
+
+        return [_serialize_program(program, requester) for program in programs]
+
+    def delete_program(self, program_id, requester):
+        """ΛΑ-2.7: only a PROGRAMMER of the program, and only while state == CREATED."""
+        program = db.session.get(Program, program_id)
+        if program is None:
+            raise NotFoundError(f"Program '{program_id}' not found")
+
+        if requester not in program.programmers:
+            raise AuthorizationError("Only a PROGRAMMER of this program can delete it")
+
+        if program.state != ProgramState.CREATED:
+            raise ConflictError("Program can only be deleted while in CREATED state")
+
+        db.session.delete(program)
+        db.session.commit()
+
 
 def _as_date(value):
     return date.fromisoformat(value) if isinstance(value, str) else value
+
+
+def _is_insider(program, requester):
+    return requester is not None and (
+        requester in program.programmers or requester in program.staff
+    )
+
+
+def _serialize_user(user):
+    return {"id": user.id, "username": user.username, "fullName": user.full_name}
+
+
+def _serialize_program(program, requester):
+    """ΛΑ-2.6: public tier for outsiders, full tier (roles + creationDate) for
+    PROGRAMMER/STAFF of this specific program."""
+    data = {
+        "id": program.id,
+        "name": program.name,
+        "description": program.description,
+        "startDate": program.start_date.isoformat(),
+        "endDate": program.end_date.isoformat(),
+        "state": program.state.value,
+    }
+
+    if _is_insider(program, requester):
+        data["creationDate"] = program.creation_date.isoformat()
+        data["programmers"] = [_serialize_user(u) for u in program.programmers]
+        data["staff"] = [_serialize_user(u) for u in program.staff]
+
+    return data
 
 
 program_service = ProgramService()
