@@ -1,23 +1,35 @@
 # Cinema Management Backend System
 
+[![CI](https://github.com/Volanakis/SoftwareEngineering101/actions/workflows/pipelines.yaml/badge.svg)](https://github.com/Volanakis/SoftwareEngineering101/actions/workflows/pipelines.yaml)
+
 Backend διαχείρισης κινηματογραφικών προγραμμάτων (σεζόν) και προβολών, υλοποιημένο ως σύνολο RESTful web services. Η εργασία εκπονείται στο πλαίσιο του μαθήματος **321-4002 – Software Engineering** (παράδοση: 14/01/2026), βάσει του εγγράφου εκφώνησης `ΕΡΓΑΣΙΑ ΜΑΘΗΜΑΤΟΣ 2025 - ΟΜΑΔΕΣ ΕΝΟΣ Ή ΔΥΟ ΑΤΟΜΩΝ.pdf`.
 
 Το σύστημα καλύπτει όλο τον κύκλο ζωής ενός προγράμματος — από τη δημιουργία του, την υποβολή προβολών, την ανάθεση προσωπικού, τις αξιολογήσεις και τον προγραμματισμό, μέχρι την τελική δημόσια ανακοίνωση. Δεν περιλαμβάνει πώληση εισιτηρίων ή εγγραφή θεατών.
 
+📖 Για πλοηγήσιμη τεκμηρίωση (requirements, architecture, API contract, task status) δείτε το [Wiki](https://github.com/Volanakis/SoftwareEngineering101/wiki).
+
+## Κατάσταση Υλοποίησης (Τρίτο Μέρος)
+
+- ✅ **Person A — Διαχείριση Προγράμματος**: μοντέλα, service layer, state machine, Flask blueprint, tests — ολοκληρωμένο.
+- 🔲 **Person B — Διαχείριση Προβολών**: δεν έχει ξεκινήσει.
+- 🔲 **Cross-cutting** (rate limiting, audit logging, SQL scripts, τελικό integration pass): εκκρεμεί.
+
+Πλήρης, ενημερωμένος καταμερισμός εργασιών: [`TASKS.md`](TASKS.md). Συμφωνημένο REST contract: [`API_CONTRACT.md`](API_CONTRACT.md). Οδηγός συνεργασίας/branching: [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 ## Τεχνολογική Στοίβα
 
-Η υλοποίηση (Τρίτο Μέρος Εργασίας) θα γίνει σε **Python** με:
+Η υλοποίηση (Τρίτο Μέρος Εργασίας) γίνεται σε **Python** με:
 
 | Ανάγκη (κατά το εκφώνημα) | Επιλογή |
 |---|---|
 | Γλώσσα υλοποίησης | Python 3 |
 | RESTful framework | **Flask** (Blueprints ανά πόρο: Program, Screening) |
 | Πρόσβαση σε δεδομένα / ORM | **SQLAlchemy** |
-| Διαχείριση εξαρτήσεων & πακέτο εργασιών | **Poetry** (αντίστοιχο του Maven για Python) |
+| Διαχείριση εξαρτήσεων | **requirements.txt** + venv/pip (Poetry εξετάστηκε αρχικά ως επιλογή, βλ. εκφώνημα — προτιμήθηκε το απλούστερο requirements.txt) |
 | Unit testing | **pytest** (αντίστοιχο του JUnit) |
-| Rate limiting | **Flask-Limiter** |
-| Βάση δεδομένων | Σχεσιακή βάση (π.χ. PostgreSQL/SQLite), κοινή με το User Management System για τον πίνακα Users |
-| Έλεγχος εκδόσεων | Git + ιδιωτικό αποθετήριο GitHub |
+| Rate limiting | **Flask-Limiter** (προγραμματισμένο, δεν έχει ενσωματωθεί ακόμα) |
+| Βάση δεδομένων | SQLite (dev/test) — σχεσιακή βάση γενικά, κοινή με το User Management System για τον πίνακα Users |
+| Έλεγχος εκδόσεων | Git + ιδιωτικό αποθετήριο GitHub, CI μέσω GitHub Actions |
 
 Αυτές είναι οι Python-ισοδύναμες επιλογές που προτείνει ρητά το εκφώνημα για όποιον δεν χρησιμοποιήσει Java/Maven/JUnit/Jersey.
 
@@ -26,11 +38,24 @@ Backend διαχείρισης κινηματογραφικών προγραμμ
 ```
 .
 ├── README.md              # το παρόν αρχείο: επισκόπηση, απαιτήσεις, διαγράμματα
-└── diagrams/              # Δεύτερο Μέρος Εργασίας: όλα τα διαγράμματα σχεδίασης (.excalidraw + .md/Mermaid)
-    └── README.md          # αναλυτική τεκμηρίωση κάθε διαγράμματος (στα Ελληνικά)
+├── TASKS.md                # καταμερισμός εργασιών & τρέχουσα κατάσταση (Person A / Person B / cross-cutting)
+├── API_CONTRACT.md         # συμφωνημένα REST endpoints, JSON σχήματα, HTTP status codes
+├── CONTRIBUTING.md         # git workflow, branch naming, τοπική εκτέλεση
+├── requirements.txt        # Python εξαρτήσεις
+├── .env.example             # template μεταβλητών περιβάλλοντος (FLASK_ENV, SECRET_KEY, DATABASE_URL)
+├── config.py                # Development/Testing/Production configuration classes
+├── run.py                   # entry point (flask dev server)
+├── app/                     # Flask εφαρμογή
+│   ├── auth.py                # session-based login, login_required, requires_role (RBAC)
+│   ├── extensions.py          # SQLAlchemy db instance
+│   ├── blueprints/            # REST resources ανά πόρο (π.χ. programs.py)
+│   ├── models/                 # SQLAlchemy μοντέλα (User, Program, ProgramRole, ...)
+│   └── services/                # business logic, state machines, redaction (π.χ. program_service.py)
+├── tests/                   # pytest, κοινά fixtures στο conftest.py
+├── .github/workflows/       # CI pipeline (pytest σε κάθε push/PR προς main)
+└── diagrams/                # Δεύτερο Μέρος Εργασίας: όλα τα διαγράμματα σχεδίασης (.excalidraw + .md/Mermaid)
+    └── README.md              # αναλυτική τεκμηρίωση κάθε διαγράμματος (στα Ελληνικά)
 ```
-
-Ο πηγαίος κώδικας (Flask εφαρμογή, μοντέλα SQLAlchemy, tests) θα προστεθεί στο πλαίσιο του Τρίτου Μέρους της εργασίας.
 
 ---
 

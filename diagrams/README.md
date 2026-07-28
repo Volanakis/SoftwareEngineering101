@@ -1,8 +1,12 @@
 # Διαγράμματα Σχεδίασης – Cinema Management Backend System
 
+⬅️ [README.md](../README.md) · 📖 [Wiki](https://github.com/Volanakis/SoftwareEngineering101/wiki) · ✅ [TASKS.md](../TASKS.md)
+
 Αυτός ο φάκελος περιέχει το πλήρες σύνολο διαγραμμάτων σχεδίασης (UML) που ζητούνται στο **Δεύτερο Μέρος** της εργασίας (321-4002 – Software Engineering, 30/100), σε μορφή `.excalidraw` (ανοίγουν απευθείας στο [excalidraw.com](https://excalidraw.com) ή στο VS Code plugin Excalidraw). Κάθε αρχείο είναι αυτόνομο και επεξεργάσιμο.
 
 Ο σχεδιασμός βασίζεται στην ανάλυση απαιτήσεων του εγγράφου `ΕΡΓΑΣΙΑ ΜΑΘΗΜΑΤΟΣ 2025 - ΟΜΑΔΕΣ ΕΝΟΣ Ή ΔΥΟ ΑΤΟΜΩΝ.pdf`. Παρακάτω περιγράφεται αναλυτικά ο σκοπός, το περιεχόμενο και η αιτιολόγηση κάθε διαγράμματος.
+
+**Σημείωση**: αυτά είναι τα διαγράμματα σχεδίασης του Δεύτερου Μέρους — παραμένουν αμετάβλητα ως τεκμηρίωση της αρχιτεκτονικής. Το πόσα από αυτά έχουν πλέον υλοποιηθεί σε κώδικα (Τρίτο Μέρος) φαίνεται στον πίνακα της §0.5 παρακάτω.
 
 ---
 
@@ -14,6 +18,31 @@
 2. **Ποιος εγκρίνει/απορρίπτει μία προβολή (Screening approval/rejection)**: Στην περιγραφή της λειτουργίας «Screening approval» (σελ. 3) αναφέρεται ότι επιτρέπεται *«by a SUBMITTER»*, κάτι που έρχεται σε **άμεση αντίφαση** με τον πίνακα ρόλων (σελ. 5), όπου η «screening approval/rejection/acceptance» ανήκει ρητά στις αρμοδιότητες του **PROGRAMMER**, καθώς και με τη γενικότερη αρχή αμεροληψίας του εγγράφου («a PROGRAMMER should not submit screenings in his/her own program»). Θα ήταν λογικά ασυνεπές ένας SUBMITTER να εγκρίνει τη δική του υποβολή. Επιλύουμε την αντίφαση υπέρ του πίνακα ρόλων: **η έγκριση και η χειροκίνητη απόρριψη προβολών εκτελούνται από PROGRAMMER**, όχι από SUBMITTER. Αυτό αποτυπώνεται σε όλα τα σχετικά διαγράμματα (use case, activity, class).
 3. **«Create Program» / «Create Screening» ως use case του USER**: Παρότι ο δημιουργός αποκτά αμέσως τον ρόλο PROGRAMMER (ή SUBMITTER), το ενεργοποιούν actor είναι ο USER (καθώς αυτό είναι το μόνο προαπαιτούμενο), σύμφωνα με τον πίνακα ρόλων. Ο νέος ρόλος είναι το **αποτέλεσμα**, όχι η προϋπόθεση, της ενέργειας.
 4. **Ρόλος SUBMITTER δεν αποθηκεύεται ως ProgramRole**: Το SUBMITTER δεν είναι εγγεγραμμένος ρόλος στο σύνολο PROGRAMMERS/STAFF ενός Program· προκύπτει έμμεσα από τη σχέση `Screening.submitter`. Αυτό αποτυπώνεται στο class diagram.
+
+### 0.5 Κατάσταση Υλοποίησης ανά Διάγραμμα (Τρίτο Μέρος)
+
+Ποια από τα παρακάτω διαγράμματα έχουν πλέον αντίστοιχο κώδικα στο `app/` — λεπτομέρειες στο [Task Board του Wiki](https://github.com/Volanakis/SoftwareEngineering101/wiki/Task-Board):
+
+| # | Διάγραμμα | Κατάσταση | Πού |
+|---|---|---|---|
+| 01 | Context diagram | — (πλαίσιο συστήματος, δεν αντιστοιχεί άμεσα σε κώδικα) | — |
+| 02 | Use Case: Διαχείριση Προγράμματος | ✅ όλα υλοποιημένα | `app/blueprints/programs.py` |
+| 03 | Use Case: Διαχείριση Προβολών | 🔲 δεν έχει ξεκινήσει | — |
+| 04 | Component diagram | 🟡 μερικώς — Program layers ✅, Screening/Rate Limiter/Logging 🔲 | `app/{blueprints,services,models}` |
+| 05 | Class diagram | 🟡 μερικώς — `User`, `Program`, `ProgramRole` ✅, `Screening` 🔲 | `app/models/` |
+| 06 | Activity: Μεταβάσεις κατάστασης προγράμματος | ✅ | `ProgramService.transition_program` |
+| 07 | Activity: Ροή υποβολής προβολής | 🔲 | — |
+| 08 | Activity: Ροή αξιολόγησης → απόφασης προβολής | 🔲 | — |
+| 09 | Activity: Αναζήτηση προγραμμάτων | ✅ | `ProgramService.search_programs` |
+| 10 | Activity: Αναζήτηση προβολών | 🔲 | — |
+| 11 | Sequence: Δημιουργία προγράμματος | ✅ | `POST /programs` |
+| 12 | Sequence: Προσθήκη PROGRAMMER/STAFF | ✅ | `POST /programs/{id}/roles` |
+| 13 | Sequence: Ενημέρωση προγράμματος | ✅ | `PUT /programs/{id}` |
+| 14 | Sequence: Προβολή προγράμματος | ✅ | `GET /programs/{id}` |
+| 15 | Sequence: Διαγραφή προγράμματος | ✅ | `DELETE /programs/{id}` |
+| 16 | Sequence: Προβολή προβολής | 🔲 | — |
+
+Ακριβές request/response σχήμα κάθε υλοποιημένου endpoint: [`API_CONTRACT.md`](../API_CONTRACT.md).
 
 ---
 
