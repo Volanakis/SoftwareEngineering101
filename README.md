@@ -1,12 +1,31 @@
-# Cinema Management Backend System
+# 🎬 Cinema Management Backend System
 
 [![CI](https://github.com/Volanakis/SoftwareEngineering101/actions/workflows/pipelines.yaml/badge.svg)](https://github.com/Volanakis/SoftwareEngineering101/actions/workflows/pipelines.yaml)
+[![Python](https://img.shields.io/badge/python-3.9%2B-3776AB?logo=python&logoColor=white)](https://www.python.org/)
+[![Flask](https://img.shields.io/badge/Flask-RESTful%20API-000000?logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
+[![SQLAlchemy](https://img.shields.io/badge/SQLAlchemy-ORM-CC2927?logo=python&logoColor=white)](https://www.sqlalchemy.org/)
+[![pytest](https://img.shields.io/badge/tested%20with-pytest-0A9EDC?logo=pytest&logoColor=white)](https://docs.pytest.org/)
+[![Diagrams](https://img.shields.io/badge/diagrams-Mermaid-FF3670?logo=mermaid&logoColor=white)](diagrams/)
 
 Backend διαχείρισης κινηματογραφικών προγραμμάτων (σεζόν) και προβολών, υλοποιημένο ως σύνολο RESTful web services. Η εργασία εκπονείται στο πλαίσιο του μαθήματος **321-4002 – Software Engineering** (παράδοση: 14/01/2026), βάσει του εγγράφου εκφώνησης `ΕΡΓΑΣΙΑ ΜΑΘΗΜΑΤΟΣ 2025 - ΟΜΑΔΕΣ ΕΝΟΣ Ή ΔΥΟ ΑΤΟΜΩΝ.pdf`.
 
 Το σύστημα καλύπτει όλο τον κύκλο ζωής ενός προγράμματος — από τη δημιουργία του, την υποβολή προβολών, την ανάθεση προσωπικού, τις αξιολογήσεις και τον προγραμματισμό, μέχρι την τελική δημόσια ανακοίνωση. Δεν περιλαμβάνει πώληση εισιτηρίων ή εγγραφή θεατών.
 
 📖 Για πλοηγήσιμη τεκμηρίωση (requirements, architecture, API contract, task status) δείτε το [Wiki](https://github.com/Volanakis/SoftwareEngineering101/wiki).
+
+## 📑 Περιεχόμενα
+
+- [📋 Κατάσταση Υλοποίησης (Τρίτο Μέρος)](#κατάσταση-υλοποίησης-τρίτο-μέρος)
+- [🛠️ Τεχνολογική Στοίβα](#τεχνολογική-στοίβα)
+- [🗂️ Δομή Αποθετηρίου](#δομή-αποθετηρίου)
+- [✅ Λειτουργικές Απαιτήσεις](#λειτουργικές-απαιτήσεις)
+  - [🔐 ΛΑ-1: Χρήστες, Αυθεντικοποίηση & Εξουσιοδότηση](#λα-1-χρήστες-αυθεντικοποίηση--εξουσιοδότηση)
+  - [🎬 ΛΑ-2: Διαχείριση Προγράμματος (Season)](#λα-2-διαχείριση-προγράμματος-season)
+  - [🎞️ ΛΑ-3: Διαχείριση Προβολών (Screening)](#λα-3-διαχείριση-προβολών-screening)
+- [⚙️ Μη Λειτουργικές Απαιτήσεις](#μη-λειτουργικές-απαιτήσεις)
+- [🖼️ Διαγράμματα Σχεδίασης (Δεύτερο Μέρος)](#διαγράμματα-σχεδίασης-δεύτερο-μέρος)
+
+---
 
 ## Κατάσταση Υλοποίησης (Τρίτο Μέρος)
 
