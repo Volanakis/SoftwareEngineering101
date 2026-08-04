@@ -3,6 +3,7 @@
 Αναλυτική επεξήγηση: βλ. `README.md` §5.1. Μέθοδοι παραλείπονται σκόπιμα (μόνο attributes/relations).
 
 ```mermaid
+%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'Segoe UI, sans-serif', 'classText':'#1e293b'}}}%%
 classDiagram
     class User {
         +UUID id
@@ -66,6 +67,17 @@ classDiagram
     User "0..1" --> "0..*" Screening : handles (STAFF)
     Program --> ProgramState : has
     Screening --> ScreeningState : has
+
+    cssClass "User" entity
+    cssClass "Program" entity
+    cssClass "Screening" entity
+    cssClass "ProgramRole" joinEntity
+    cssClass "ProgramState" enumeration
+    cssClass "ScreeningState" enumeration
+
+    classDef entity fill:#dbeafe,stroke:#2563eb,stroke-width:2px,color:#1e3a8a
+    classDef joinEntity fill:#ccfbf1,stroke:#0d9488,stroke-width:2px,color:#134e4a
+    classDef enumeration fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#78350f
 ```
 
 > Σημείωση: το `ProgramRole` είναι η κλάση σύνδεσης User↔Program (many-to-many) με attribute `roleType`. Ο ρόλος SUBMITTER δεν αποθηκεύεται εκεί — προκύπτει έμμεσα από τη σχέση `Screening.submitter`.
