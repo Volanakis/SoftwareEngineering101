@@ -3,7 +3,7 @@
 Καλύπτει: creation, update, submission, withdrawal. Αναλυτική επεξήγηση: βλ. `README.md` §4.2.
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'Segoe UI, sans-serif', 'primaryColor':'#dbeafe', 'primaryBorderColor':'#2563eb', 'primaryTextColor':'#1e3a8a', 'lineColor':'#64748b'}}}%%
+%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'Segoe UI, sans-serif', 'background':'#ffffff', 'primaryColor':'#dbeafe', 'primaryBorderColor':'#2563eb', 'primaryTextColor':'#1e3a8a', 'lineColor':'#64748b'}}}%%
 flowchart TD
     subgraph Submitter["📤 SUBMITTER (owner)"]
         A1[Create screening: select program + initial fields]

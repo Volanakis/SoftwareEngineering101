@@ -3,7 +3,7 @@
 Αναλυτική επεξήγηση: βλ. `README.md` §5.1. Μέθοδοι παραλείπονται σκόπιμα (μόνο attributes/relations).
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'Segoe UI, sans-serif', 'classText':'#1e293b'}}}%%
+%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'Segoe UI, sans-serif', 'background':'#ffffff', 'lineColor':'#64748b', 'classText':'#64748b'}}}%%
 classDiagram
     class User {
         +UUID id

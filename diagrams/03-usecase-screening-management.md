@@ -3,7 +3,7 @@
 Αναλυτική επεξήγηση: βλ. `README.md` §3.2.
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'Segoe UI, sans-serif', 'primaryColor':'#fef9c3', 'primaryBorderColor':'#ca8a04', 'primaryTextColor':'#713f12', 'lineColor':'#7c3aed'}}}%%
+%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'Segoe UI, sans-serif', 'background':'#ffffff', 'primaryColor':'#fef9c3', 'primaryBorderColor':'#ca8a04', 'primaryTextColor':'#713f12', 'lineColor':'#8b5cf6'}}}%%
 flowchart LR
     Visitor(("👤 Visitor"))
     User(("🙋 User"))

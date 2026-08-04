@@ -3,7 +3,7 @@
 Αναλυτική επεξήγηση: βλ. `README.md` §4.5.
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'Segoe UI, sans-serif', 'primaryColor':'#dbeafe', 'primaryBorderColor':'#2563eb', 'primaryTextColor':'#1e3a8a', 'lineColor':'#64748b'}}}%%
+%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'Segoe UI, sans-serif', 'background':'#ffffff', 'primaryColor':'#dbeafe', 'primaryBorderColor':'#2563eb', 'primaryTextColor':'#1e3a8a', 'lineColor':'#64748b'}}}%%
 flowchart TD
     Start((Start)) --> A1[Receive search request within a program:<br/>optional filmTitle, cast, genre, dateRange<br/>+ requester role]
     A1 --> D1{Any filters supplied?}

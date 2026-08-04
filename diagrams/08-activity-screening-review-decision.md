@@ -3,7 +3,7 @@
 Καλύπτει: assign handler, review, approve, reject (manual & automatic), final submission, acceptance. Αναλυτική επεξήγηση: βλ. `README.md` §4.3.
 
 ```mermaid
-%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'Segoe UI, sans-serif', 'primaryColor':'#dbeafe', 'primaryBorderColor':'#2563eb', 'primaryTextColor':'#1e3a8a', 'lineColor':'#64748b'}}}%%
+%%{init: {'theme':'base', 'themeVariables': {'fontFamily':'Segoe UI, sans-serif', 'background':'#ffffff', 'primaryColor':'#dbeafe', 'primaryBorderColor':'#2563eb', 'primaryTextColor':'#1e3a8a', 'lineColor':'#64748b'}}}%%
 flowchart TD
     subgraph Programmer["🎬 Programmer"]
         A1[Assign exactly one STAFF as handler]
