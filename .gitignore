@@ -23,3 +23,10 @@ __pycache__/
 
 // Ignore local environment variables
 .env
+
+// Ignore database instance
+instance/
+*.db
+
+// Ignore pdf files
+*.pdf
