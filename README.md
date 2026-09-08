@@ -72,7 +72,7 @@ Backend διαχείρισης κινηματογραφικών προγραμμ
 │   └── services/                # business logic, state machines, redaction (π.χ. program_service.py)
 ├── tests/                   # pytest, κοινά fixtures στο conftest.py
 ├── .github/workflows/       # CI pipeline (pytest σε κάθε push/PR προς main)
-└── diagrams/                # Δεύτερο Μέρος Εργασίας: όλα τα διαγράμματα σχεδίασης (.excalidraw + .md/Mermaid)
+└── diagrams/                # Δεύτερο Μέρος Εργασίας: όλα τα διαγράμματα σχεδίασης (.md/Mermaid)
     └── README.md              # αναλυτική τεκμηρίωση κάθε διαγράμματος (στα Ελληνικά)
 ```
 
@@ -160,7 +160,7 @@ Backend διαχείρισης κινηματογραφικών προγραμμ
 
 ## Διαγράμματα Σχεδίασης (Δεύτερο Μέρος)
 
-Ο φάκελος [`diagrams/`](diagrams/) περιέχει το πλήρες σύνολο διαγραμμάτων UML, το καθένα σε **δύο μορφές**: επεξεργάσιμο `.excalidraw` και αντίστοιχο `.md` με ενσωματωμένο **Mermaid** diagram (αποδίδεται αυτόματα ως εικόνα στο GitHub/VS Code, χωρίς να χρειάζεται excalidraw.com) — μαζί με ένα αναλυτικό [`diagrams/README.md`](diagrams/README.md) που εξηγεί τον σκοπό, το περιεχόμενο και τον χάρτη κάλυψης των use cases για καθένα από αυτά. Σύνοψη:
+Ο φάκελος [`diagrams/`](diagrams/) περιέχει το πλήρες σύνολο διαγραμμάτων UML, το καθένα ως `.md` αρχείο με ενσωματωμένο **Mermaid** diagram (αποδίδεται αυτόματα ως εικόνα στο GitHub/VS Code, χωρίς εξωτερικό εργαλείο) — μαζί με ένα αναλυτικό [`diagrams/README.md`](diagrams/README.md) που εξηγεί τον σκοπό, το περιεχόμενο και τον χάρτη κάλυψης των use cases για καθένα από αυτά. Σύνοψη:
 
 | # | Διάγραμμα | Τύπος |
 |---|---|---|
@@ -183,4 +183,4 @@ Backend διαχείρισης κινηματογραφικών προγραμμ
 
 Τα activity και sequence diagrams καλύπτουν **από κοινού και χωρίς επικάλυψη** όλα τα 20 use cases του συστήματος (βλ. πίνακα κάλυψης στο `diagrams/README.md`, §1).
 
-Για γρήγορη προβολή: ανοίξτε το αντίστοιχο `.md` αρχείο (rendered απευθείας στο GitHub/VS Code). Για επεξεργασία: ανοίξτε το `.excalidraw` αρχείο στο [excalidraw.com](https://excalidraw.com) ή μέσω της αντίστοιχης επέκτασης VS Code.
+Για γρήγορη προβολή: ανοίξτε το αντίστοιχο `.md` αρχείο (rendered απευθείας στο GitHub/VS Code). Για επεξεργασία: τροποποιήστε το `mermaid` code block μέσα στο `.md` αρχείο (ζωντανή προεπισκόπηση στο [mermaid.live](https://mermaid.live)).
