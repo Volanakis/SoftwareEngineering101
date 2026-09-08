@@ -1,11 +1,10 @@
 # 🖼️ Διαγράμματα Σχεδίασης – Cinema Management Backend System
 
 [![Diagrams](https://img.shields.io/badge/diagrams-Mermaid-FF3670?logo=mermaid&logoColor=white)](.)
-[![Excalidraw](https://img.shields.io/badge/editable-Excalidraw-6965DB?logo=excalidraw&logoColor=white)](https://excalidraw.com)
 
 ⬅️ [README.md](../README.md) · 📖 [Wiki](https://github.com/Volanakis/SoftwareEngineering101/wiki) · ✅ [TASKS.md](../TASKS.md)
 
-Αυτός ο φάκελος περιέχει το πλήρες σύνολο διαγραμμάτων σχεδίασης (UML) που ζητούνται στο **Δεύτερο Μέρος** της εργασίας (321-4002 – Software Engineering, 30/100), σε μορφή `.excalidraw` (ανοίγουν απευθείας στο [excalidraw.com](https://excalidraw.com) ή στο VS Code plugin Excalidraw). Κάθε αρχείο είναι αυτόνομο και επεξεργάσιμο.
+Αυτός ο φάκελος περιέχει το πλήρες σύνολο διαγραμμάτων σχεδίασης (UML) που ζητούνται στο **Δεύτερο Μέρος** της εργασίας (321-4002 – Software Engineering, 30/100), ως αρχεία `.md` με ενσωματωμένο [Mermaid](https://mermaid.js.org) diagram (αποδίδονται απευθείας ως εικόνα στο GitHub, στο GitLab και στο preview του VS Code). Κάθε αρχείο είναι αυτόνομο και επεξεργάσιμο ως απλό κείμενο.
 
 Ο σχεδιασμός βασίζεται στην ανάλυση απαιτήσεων του εγγράφου `ΕΡΓΑΣΙΑ ΜΑΘΗΜΑΤΟΣ 2025 - ΟΜΑΔΕΣ ΕΝΟΣ Ή ΔΥΟ ΑΤΟΜΩΝ.pdf`. Παρακάτω περιγράφεται αναλυτικά ο σκοπός, το περιεχόμενο και η αιτιολόγηση κάθε διαγράμματος.
 
@@ -90,9 +89,9 @@
 
 ### Πλήρης λίστα αρχείων
 
-Κάθε διάγραμμα υπάρχει σε **δύο μορφές**: το επεξεργάσιμο `.excalidraw` (για το excalidraw.com / VS Code extension) και ένα αντίστοιχο **`.md` με ενσωματωμένο Mermaid diagram**, ίδιου ονόματος, που αποδίδεται αυτόματα ως εικόνα μέσα στο GitHub, στο GitLab και στο preview του VS Code — χωρίς να χρειάζεται άνοιγμα του excalidraw. Όλα τα `.md` αρχεία έχουν επαληθευτεί ότι κάνουν parse/render σωστά με το `@mermaid-js/mermaid-cli`.
+Κάθε διάγραμμα είναι ένα **`.md` αρχείο με ενσωματωμένο Mermaid diagram**, που αποδίδεται αυτόματα ως εικόνα μέσα στο GitHub, στο GitLab και στο preview του VS Code — χωρίς εξωτερικό εργαλείο σχεδίασης. Όλα τα `.md` αρχεία έχουν επαληθευτεί ότι κάνουν parse/render σωστά με το `@mermaid-js/mermaid-cli`.
 
-| Αρχείο (.excalidraw / .md) | Τύπος | Τίτλος |
+| Αρχείο (`.md`) | Τύπος | Τίτλος |
 |---|---|---|
 | `01-context-diagram` | Context | Πλαίσιο συστήματος |
 | `02-usecase-program-management` | Use Case | Διαχείριση Προγράμματος |
@@ -111,13 +110,13 @@
 | `15-sequence-program-deletion` | Sequence | Διαγραφή προγράμματος |
 | `16-sequence-screening-view` | Sequence | Προβολή προβολής (redaction) |
 
-**Σημείωση για τα Mermaid `.md`**: το Mermaid δεν διαθέτει native τύπο για use case ή component diagrams, οπότε τα `02`, `03`, `04` αποδίδονται ως `flowchart` (actors/use cases ως κόμβοι, boundary ως subgraph) — σημασιολογικά ταυτόσημα με το `.excalidraw`, με αυτόματο (διαφορετικό) layout. Τα `05` (class), και `11`–`16` (sequence) χρησιμοποιούν τους αντίστοιχους **native** τύπους του Mermaid (`classDiagram`, `sequenceDiagram` με πραγματικά `alt` fragments), ενώ τα activity diagrams `06`–`10` αποδίδονται ως `flowchart` με `subgraph` για τα διαδικά (swimlanes).
+**Σημείωση για τα Mermaid `.md`**: το Mermaid δεν διαθέτει native τύπο για use case ή component diagrams, οπότε τα `02`, `03`, `04` αποδίδονται ως `flowchart` (actors/use cases ως κόμβοι, boundary ως subgraph), με αυτόματο layout. Τα `05` (class), και `11`–`16` (sequence) χρησιμοποιούν τους αντίστοιχους **native** τύπους του Mermaid (`classDiagram`, `sequenceDiagram` με πραγματικά `alt` fragments), ενώ τα activity diagrams `06`–`10` αποδίδονται ως `flowchart` με `subgraph` για τα διαδικά (swimlanes).
 
 ---
 
 ## 2. Αρχιτεκτονική & Πλαίσιο Συστήματος
 
-### 2.1 Context Diagram — `01-context-diagram.excalidraw`
+### 2.1 Context Diagram — `01-context-diagram.md`
 
 Απεικονίζει το **Cinema Management Backend System** ως «μαύρο κουτί» και το περιβάλλον του:
 
@@ -128,7 +127,7 @@
 
 Το διάγραμμα δικαιολογεί γιατί το σύστημα χρειάζεται authentication/authorization module εσωτερικά (η ασάφεια/παραδοχή #7 του εγγράφου) και γιατί η βάση είναι διαμοιραζόμενη.
 
-### 2.2 Component Diagram — `04-component-diagram.excalidraw`
+### 2.2 Component Diagram — `04-component-diagram.md`
 
 Παρουσιάζει μια τυπική **layered / RESTful αρχιτεκτονική**:
 
@@ -148,11 +147,11 @@
 
 ## 3. Use Cases
 
-### 3.1 `02-usecase-program-management.excalidraw`
+### 3.1 `02-usecase-program-management.md`
 
 Actors: **Visitor**, **User** (γενίκευση του Visitor), **Programmer** (γενίκευση του User). Use cases: Search Programs, View Program, Create Program, Update Program, Add Programmer, Add Staff, Delete Program, Update Program State (ένα ενιαίο use case που αντιπροσωπεύει και τις 7 επιτρεπτές μεταβάσεις καταστάσεων, βλ. §4.1). Ο Visitor συνδέεται μόνο με Search/View (καθώς αυτά είναι κοινά, με redaction στο περιεχόμενο ανάλογα με τον ρόλο)· ο User προσθέτει το Create Program· ο Programmer προσθέτει όλες τις διαχειριστικές ενέργειες.
 
-### 3.2 `03-usecase-screening-management.excalidraw`
+### 3.2 `03-usecase-screening-management.md`
 
 Actors: **Visitor**, **User**, **Submitter**, **Staff**, **Programmer** (οι τρεις τελευταίοι είναι γενικεύσεις του User — υπενθυμίζεται ότι ένας χρήστης μπορεί να έχει διαφορετικό ρόλο σε διαφορετικό πρόγραμμα, αλλά το διάγραμμα δείχνει τις δυνατότητες ανά ρόλο, ανεξαρτήτως προγράμματος). 12 use cases: Search/View Screening (κοινά, redaction ανά ρόλο), Create Screening (User), Update/Submit/Withdraw/Final Submission Screening (Submitter — μόνο για τις δικές του προβολές), Review Screening (Staff — μόνο για προβολές όπου έχει οριστεί handler), Assign Handler/Approve/Reject/Accept Screening (Programmer — σύμφωνα με την παραδοχή §0.2).
 
@@ -160,7 +159,7 @@ Actors: **Visitor**, **User**, **Submitter**, **Staff**, **Programmer** (οι τ
 
 ## 4. Συμπεριφορά Συστήματος
 
-### 4.1 Activity — Μεταβάσεις Κατάστασης Προγράμματος (`06-activity-program-state-transitions.excalidraw`)
+### 4.1 Activity — Μεταβάσεις Κατάστασης Προγράμματος (`06-activity-program-state-transitions.md`)
 
 Καλύπτει το use case **Program State Update** συνολικά (και τις 7 επιτρεπτές μεταβάσεις: CREATED→SUBMISSION→ASSIGNMENT→REVIEW→SCHEDULING→FINAL_SUBMISSION→DECISION→ANNOUNCED), αντί να σχεδιαστούν 7 ξεχωριστά διαγράμματα, αφού μοιράζονται πανομοιότυπη δομή ελέγχου. Δύο διαδικά (swimlanes): **Programmer** και **System**. Ροή:
 
@@ -171,14 +170,14 @@ Actors: **Visitor**, **User**, **Submitter**, **Staff**, **Programmer** (οι τ
 5. **Ειδική περίπτωση**: αν ο στόχος είναι DECISION, οι εγκεκριμένες (APPROVED) προβολές που δεν έχουν κάνει final submission απορρίπτονται αυτόματα.
 6. Η νέα κατάσταση αποθηκεύεται (persist) μαζί με εγγραφή audit log και επιστρέφεται 200 OK.
 
-### 4.2 Activity — Ροή Υποβολής Προβολής (`07-activity-screening-submission.excalidraw`)
+### 4.2 Activity — Ροή Υποβολής Προβολής (`07-activity-screening-submission.md`)
 
 Καλύπτει τα use cases **Screening Creation, Update, Submission, Withdrawal**. Δύο διαδικά: **Submitter (owner)** και **System**.
 
 1. Δημιουργία screening (επιλογή προγράμματος + αρχικά πεδία) → το σύστημα αυτόματα αναθέτει τον ρόλο SUBMITTER στον δημιουργό, παράγει id/creationDate, θέτει state=CREATED.
 2. Στη συνέχεια ο owner μπορεί επαναληπτικά (loop) να: **(α)** επεξεργαστεί πεδία (auditorium, film, start/end time) όσο state=CREATED, **(β)** να αποσύρει (withdraw) το screening — επιτρέπεται μόνο αν state=CREATED, οπότε διαγράφεται οριστικά, ή **(γ)** να το υποβάλει (submit) — επιτρέπεται μόνο αν το πρόγραμμα βρίσκεται σε SUBMISSION **και** το screening είναι πλήρες (film + auditorium + παραγόμενο end time από τη διάρκεια ταινίας)· σε επιτυχία state=SUBMITTED, αλλιώς επιστρέφεται σφάλμα.
 
-### 4.3 Activity — Ροή Αξιολόγησης → Απόφασης Προβολής (`08-activity-screening-review-decision.excalidraw`)
+### 4.3 Activity — Ροή Αξιολόγησης → Απόφασης Προβολής (`08-activity-screening-review-decision.md`)
 
 Το πιο σύνθετο διάγραμμα· καλύπτει τα use cases **Assign Handler, Review, Approval, Rejection (manual & automatic), Final Submission, Acceptance**. Τέσσερα διαδικά: **Programmer**, **Staff (handler)**, **Submitter (owner)**, **System**, καθένα ενεργό στην αντίστοιχη φάση του κύκλου ζωής του Program:
 
@@ -194,11 +193,11 @@ Actors: **Visitor**, **User**, **Submitter**, **Staff**, **Programmer** (οι τ
 
 Το διάγραμμα αναδεικνύει καθαρά και τους δύο μηχανισμούς απόρριψης (χειροκίνητη σε SCHEDULING/DECISION, αυτόματη στο DECISION) όπως ρητά απαιτεί το εκφώνημα, καθώς και τη λογική «rejection reason must be recorded in all cases».
 
-### 4.4 Activity — Αναζήτηση Προγραμμάτων (`09-activity-program-search.excalidraw`)
+### 4.4 Activity — Αναζήτηση Προγραμμάτων (`09-activity-program-search.md`)
 
 Καλύπτει το use case **Program Search**. Δέχεται προαιρετικά κριτήρια (name, description, dates, filmTitle, auditorium)· αν δεν δοθεί κανένα, επιστρέφονται όλα τα προγράμματα· αλλιώς εφαρμόζονται όλα τα δοθέντα κριτήρια με σημασιολογία **AND**. Ακολουθεί φιλτράρισμα βάσει ρόλου του αιτούντος (ο Visitor/User βλέπει μόνο ANNOUNCED, ο Programmer βλέπει επιπλέον όσα διαχειρίζεται) και ταξινόμηση **πρώτα κατά ημερομηνία, μετά κατά όνομα**, όπως ορίζει ρητά το εκφώνημα.
 
-### 4.5 Activity — Αναζήτηση Προβολών (`10-activity-screening-search.excalidraw`)
+### 4.5 Activity — Αναζήτηση Προβολών (`10-activity-screening-search.md`)
 
 Καλύπτει το use case **Screening Search** (εντός συγκεκριμένου προγράμματος). Κριτήρια: filmTitle, cast, genre, dateRange — προαιρετικά, με σημασιολογία **AND** μεταξύ τους· εντός κάθε πεδίου κειμένου, όλες οι λέξεις που δόθηκαν πρέπει να εμφανίζονται (case-insensitive, π.χ. `"star war"` ταιριάζει με `"Star Wars"`). Μετά το φιλτράρισμα ρόλου, η ταξινόμηση είναι **κατά genre, μετά κατά τίτλο ταινίας**, εκτός αν ζητείται προβολή χρονοδιαγράμματος (timetable view), οπότε ταξινομείται **κατά start_time**.
 
@@ -206,18 +205,18 @@ Actors: **Visitor**, **User**, **Submitter**, **Staff**, **Programmer** (οι τ
 
 Όλα τα sequence diagrams ακολουθούν το ίδιο αρχιτεκτονικό μοτίβο του component diagram: **Actor → REST Resource → Service (→ AuthorizationHelper) → Repository → Database**, με συγχρονισμένα μηνύματα (συνεχής γραμμή) για κλήσεις και μηνύματα επιστροφής (διακεκομμένη γραμμή) για απαντήσεις. Οι εναλλακτικές διαδρομές (επιτυχία/σφάλμα) απεικονίζονται με πλαίσιο σύνθετου θραύσματος **alt** (κατά τη σημειογραφία UML).
 
-- **`11-sequence-program-creation.excalidraw`** (Program Creation): ελέγχεται η μοναδικότητα του ονόματος (`existsByName`) πριν τη δημιουργία· το `alt` πλαίσιο διαχωρίζει τη διαδρομή επιτυχίας (`!exists`) από το σφάλμα 409 Conflict (`exists`). Σε επιτυχία παράγονται αυτόματα id/creationDate και ο δημιουργός γίνεται PROGRAMMER.
-- **`12-sequence-add-programmer-staff.excalidraw`** (Add Programmer / Add Staff): ένα ενιαίο διάγραμμα με `alt [roleType == PROGRAMMER]` / `else [roleType == STAFF]`, δείχνοντας τον έλεγχο εξουσιοδότησης (requester ∈ PROGRAMMERS), τον έλεγχο μη-διπλής-εγγραφής, και για το STAFF, τον επιπλέον έλεγχο ότι το πρόγραμμα δεν έχει περάσει state SUBMISSION (πάγωμα συνόλου STAFF).
-- **`13-sequence-program-update.excalidraw`** (Program Update): `alt` πλαίσιο ελέγχει ταυτόχρονα εξουσιοδότηση, ότι state != ANNOUNCED, και ότι ο δημιουργός παραμένει στο σύνολο PROGRAMMERS αν άλλαξαν οι ρόλοι.
-- **`14-sequence-program-view.excalidraw`** (Program View): δεν έχει `alt` πλαίσιο σφάλματος αφού πρόκειται για ιδεμπότεντη, καθολικά προσβάσιμη ενέργεια· αντ' αυτού αναδεικνύεται ο ξεχωριστός συνεργάτης `AuthorizationHelper` που προσδιορίζει τον ενεργό ρόλο του αιτούντος και το επακόλουθο βήμα **redaction** (φιλτράρισμα πεδίων ανάλογα με τον ρόλο).
-- **`15-sequence-program-deletion.excalidraw`** (Program Deletion): `alt` πλαίσιο ελέγχει ότι ο αιτών είναι PROGRAMMER **και** state == CREATED πριν επιτραπεί η διαγραφή.
-- **`16-sequence-screening-view.excalidraw`** (Screening View): ανάλογο με το Program View· ο `AuthorizationHelper` λαμβάνει υπόψη αν ο αιτών είναι ο owner (SUBMITTER), ο ανατεθειμένος handler (STAFF), PROGRAMMER του προγράμματος, ή απλός επισκέπτης (οπότε βλέπει μόνο δημόσια πεδία εφόσον state=SCHEDULED).
+- **`11-sequence-program-creation.md`** (Program Creation): ελέγχεται η μοναδικότητα του ονόματος (`existsByName`) πριν τη δημιουργία· το `alt` πλαίσιο διαχωρίζει τη διαδρομή επιτυχίας (`!exists`) από το σφάλμα 409 Conflict (`exists`). Σε επιτυχία παράγονται αυτόματα id/creationDate και ο δημιουργός γίνεται PROGRAMMER.
+- **`12-sequence-add-programmer-staff.md`** (Add Programmer / Add Staff): ένα ενιαίο διάγραμμα με `alt [roleType == PROGRAMMER]` / `else [roleType == STAFF]`, δείχνοντας τον έλεγχο εξουσιοδότησης (requester ∈ PROGRAMMERS), τον έλεγχο μη-διπλής-εγγραφής, και για το STAFF, τον επιπλέον έλεγχο ότι το πρόγραμμα δεν έχει περάσει state SUBMISSION (πάγωμα συνόλου STAFF).
+- **`13-sequence-program-update.md`** (Program Update): `alt` πλαίσιο ελέγχει ταυτόχρονα εξουσιοδότηση, ότι state != ANNOUNCED, και ότι ο δημιουργός παραμένει στο σύνολο PROGRAMMERS αν άλλαξαν οι ρόλοι.
+- **`14-sequence-program-view.md`** (Program View): δεν έχει `alt` πλαίσιο σφάλματος αφού πρόκειται για ιδεμπότεντη, καθολικά προσβάσιμη ενέργεια· αντ' αυτού αναδεικνύεται ο ξεχωριστός συνεργάτης `AuthorizationHelper` που προσδιορίζει τον ενεργό ρόλο του αιτούντος και το επακόλουθο βήμα **redaction** (φιλτράρισμα πεδίων ανάλογα με τον ρόλο).
+- **`15-sequence-program-deletion.md`** (Program Deletion): `alt` πλαίσιο ελέγχει ότι ο αιτών είναι PROGRAMMER **και** state == CREATED πριν επιτραπεί η διαγραφή.
+- **`16-sequence-screening-view.md`** (Screening View): ανάλογο με το Program View· ο `AuthorizationHelper` λαμβάνει υπόψη αν ο αιτών είναι ο owner (SUBMITTER), ο ανατεθειμένος handler (STAFF), PROGRAMMER του προγράμματος, ή απλός επισκέπτης (οπότε βλέπει μόνο δημόσια πεδία εφόσον state=SCHEDULED).
 
 ---
 
 ## 5. Οντότητες Συστήματος
 
-### 5.1 Class Diagram — `05-class-diagram.excalidraw`
+### 5.1 Class Diagram — `05-class-diagram.md`
 
 Εστιάζει αποκλειστικά στις **κύριες πληροφοριακές οντότητες** και τις σχέσεις τους (χωρίς μεθόδους, όπως ζητά το εκφώνημα):
 
@@ -235,6 +234,6 @@ Actors: **Visitor**, **User**, **Submitter**, **Staff**, **Programmer** (οι τ
 
 ## 6. Πώς να ανοίξετε/επεξεργαστείτε τα διαγράμματα
 
-1. Μεταβείτε στο [https://excalidraw.com](https://excalidraw.com) (ή χρησιμοποιήστε την επέκταση Excalidraw για VS Code).
-2. Menu → **Open** → επιλέξτε το αντίστοιχο `.excalidraw` αρχείο.
-3. Για ενσωμάτωση στην αναφορά (Word/PDF): Menu → **Export image** → PNG/SVG με λευκό φόντο, ή επιλέξτε τα στοιχεία και **Copy to clipboard as PNG**.
+1. **Προβολή**: ανοίξτε το αντίστοιχο `.md` αρχείο στο GitHub (αποδίδεται αυτόματα) ή στο VS Code με την επέκταση *Markdown Preview Mermaid Support*.
+2. **Επεξεργασία**: τροποποιήστε απευθείας το `mermaid` code block μέσα στο `.md` αρχείο με οποιονδήποτε editor· για ζωντανή προεπισκόπηση, επικολλήστε το block στο [mermaid.live](https://mermaid.live).
+3. **Εξαγωγή εικόνας** για ενσωμάτωση στην αναφορά (Word/PDF): στο [mermaid.live](https://mermaid.live) → **Actions → PNG/SVG**, ή από τη γραμμή εντολών με `npx -p @mermaid-js/mermaid-cli mmdc -i <αρχείο>.md -o <όνομα>.md -e png` (παράγει `<όνομα>-1.png` για το diagram block του αρχείου).
