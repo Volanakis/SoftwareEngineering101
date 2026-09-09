@@ -46,9 +46,14 @@ class ScreeningService:
             screening.film_genres = data["filmGenres"]
 
         if "filmDurationMinutes" in data:
-            screening.film_duration_minutes = int(
-                data["filmDurationMinutes"]
-            )
+            duration = int(data["filmDurationMinutes"])
+
+            if duration <= 0:
+                raise ValidationError(
+                    "filmDurationMinutes must be greater than zero"
+                )
+
+            screening.film_duration_minutes = duration
 
         if "auditoriumName" in data:
             screening.auditorium_name = data["auditoriumName"]
@@ -70,7 +75,7 @@ class ScreeningService:
         data,
         requester,
     ):
-        program, screening = self._get_program_and_screening(
+        _, screening = self._get_program_and_screening(
             program_id,
             screening_id,
         )
@@ -95,7 +100,12 @@ class ScreeningService:
             screening.film_genres = data["filmGenres"]
 
         if "filmDurationMinutes" in data:
-            duration = int(data["filmDurationMinutes"])
+            try:
+                duration = int(data["filmDurationMinutes"])
+            except (TypeError, ValueError):
+                raise ValidationError(
+                    "filmDurationMinutes must be an integer"
+                )
 
             if duration <= 0:
                 raise ValidationError(
@@ -170,7 +180,7 @@ class ScreeningService:
         screening_id,
         requester,
     ):
-        program, screening = self._get_program_and_screening(
+        _, screening = self._get_program_and_screening(
             program_id,
             screening_id,
         )
@@ -273,12 +283,13 @@ class ScreeningService:
                 "Missing required field: comments"
             )
 
-        screening.review_score = float(
-            data["score"]
-        )
+        try:
+            score = float(data["score"])
+        except (TypeError, ValueError):
+            raise ValidationError("score must be numeric")
 
+        screening.review_score = score
         screening.review_comments = data["comments"]
-
         screening.state = ScreeningState.REVIEWED
 
         db.session.commit()
@@ -310,7 +321,6 @@ class ScreeningService:
             )
 
         screening.approval_notes = data.get("notes")
-
         screening.state = ScreeningState.APPROVED
 
         db.session.commit()
@@ -346,8 +356,15 @@ class ScreeningService:
                 "Rejection is allowed only during SCHEDULING or DECISION"
             )
 
-        screening.rejection_reason = reason
+        if screening.state in {
+            ScreeningState.SCHEDULED,
+            ScreeningState.REJECTED,
+        }:
+            raise ConflictError(
+                "Screening is already in a final state"
+            )
 
+        screening.rejection_reason = reason
         screening.state = ScreeningState.REJECTED
 
         db.session.commit()
@@ -458,12 +475,23 @@ class ScreeningService:
         screening_id,
         requester,
     ):
-        program, screening = self._get_program_and_screening(
+        _, screening = self._get_program_and_screening(
             program_id,
             screening_id,
         )
 
-        return screening
+        if (
+            not self._has_full_access(screening, requester)
+            and not self._is_public(screening)
+        ):
+            raise NotFoundError(
+                f"Screening '{screening_id}' not found"
+            )
+
+        return self._serialize_screening(
+            screening,
+            requester,
+        )
 
     def search_screenings(
         self,
@@ -515,10 +543,48 @@ class ScreeningService:
                     )
                 )
 
-        return query.order_by(
-            Screening.film_genres.asc(),
-            Screening.film_title.asc(),
-        ).all()
+        date_from = filters.get("dateFrom")
+
+        if date_from:
+            query = query.filter(
+                Screening.start_time
+                >= self._parse_datetime(date_from)
+            )
+
+        date_to = filters.get("dateTo")
+
+        if date_to:
+            query = query.filter(
+                Screening.start_time
+                <= self._parse_datetime(date_to)
+            )
+
+        if filters.get("view") == "timetable":
+            screenings = query.order_by(
+                Screening.start_time.asc()
+            ).all()
+        else:
+            screenings = query.order_by(
+                Screening.film_genres.asc(),
+                Screening.film_title.asc(),
+            ).all()
+
+        visible = [
+            screening
+            for screening in screenings
+            if (
+                self._has_full_access(screening, requester)
+                or self._is_public(screening)
+            )
+        ]
+
+        return [
+            self._serialize_screening(
+                screening,
+                requester,
+            )
+            for screening in visible
+        ]
 
     def _get_program_and_screening(
         self,
@@ -575,6 +641,98 @@ class ScreeningService:
             raise AuthorizationError(
                 "Only a PROGRAMMER of this program can perform this action"
             )
+
+    def _has_full_access(
+        self,
+        screening,
+        requester,
+    ):
+        if requester is None:
+            return False
+
+        if requester.id == screening.submitter_id:
+            return True
+
+        if (
+            screening.handler_id is not None
+            and requester.id == screening.handler_id
+        ):
+            return True
+
+        return requester in screening.program.programmers
+
+    def _is_public(self, screening):
+        return (
+            screening.program.state
+            == ProgramState.ANNOUNCED
+            and screening.state
+            == ScreeningState.SCHEDULED
+        )
+
+    def _serialize_screening(
+        self,
+        screening,
+        requester,
+    ):
+        if self._has_full_access(
+            screening,
+            requester,
+        ):
+            return {
+                "id": screening.id,
+                "creationDate": (
+                    screening.creation_date.isoformat()
+                    if screening.creation_date
+                    else None
+                ),
+                "state": screening.state.value,
+                "filmTitle": screening.film_title,
+                "filmCast": screening.film_cast,
+                "filmGenres": screening.film_genres,
+                "filmDurationMinutes": (
+                    screening.film_duration_minutes
+                ),
+                "auditoriumName": (
+                    screening.auditorium_name
+                ),
+                "startTime": (
+                    screening.start_time.isoformat()
+                    if screening.start_time
+                    else None
+                ),
+                "endTime": (
+                    screening.end_time.isoformat()
+                    if screening.end_time
+                    else None
+                ),
+                "submitterId": screening.submitter_id,
+                "handlerId": screening.handler_id,
+                "reviewScore": screening.review_score,
+                "reviewComments": (
+                    screening.review_comments
+                ),
+                "rejectionReason": (
+                    screening.rejection_reason
+                ),
+                "finalSubmitted": (
+                    screening.final_submitted
+                ),
+                "approvalNotes": (
+                    screening.approval_notes
+                ),
+            }
+
+        return {
+            "id": screening.id,
+            "filmTitle": screening.film_title,
+            "filmGenres": screening.film_genres,
+            "auditoriumName": screening.auditorium_name,
+            "startTime": (
+                screening.start_time.isoformat()
+                if screening.start_time
+                else None
+            ),
+        }
 
     def _parse_datetime(
         self,

@@ -49,7 +49,9 @@ def _serialize_screening(screening):
         "filmTitle": screening.film_title,
         "filmCast": screening.film_cast,
         "filmGenres": screening.film_genres,
-        "filmDurationMinutes": screening.film_duration_minutes,
+        "filmDurationMinutes": (
+            screening.film_duration_minutes
+        ),
         "auditoriumName": screening.auditorium_name,
         "startTime": (
             screening.start_time.isoformat()
@@ -66,6 +68,8 @@ def _serialize_screening(screening):
         "reviewScore": screening.review_score,
         "reviewComments": screening.review_comments,
         "rejectionReason": screening.rejection_reason,
+        "finalSubmitted": screening.final_submitted,
+        "approvalNotes": screening.approval_notes,
     }
 
 
@@ -74,9 +78,13 @@ def create_screening(program_id):
     user = get_current_user()
 
     if user is None:
-        return jsonify(error="Authentication required"), 401
+        return jsonify(
+            error="Authentication required"
+        ), 401
 
-    payload = request.get_json(silent=True) or {}
+    payload = request.get_json(
+        silent=True
+    ) or {}
 
     screening = screening_service.create_screening(
         program_id,
@@ -84,7 +92,9 @@ def create_screening(program_id):
         user,
     )
 
-    return jsonify(_serialize_screening(screening)), 201
+    return jsonify(
+        _serialize_screening(screening)
+    ), 201
 
 
 @screenings_bp.get("")
@@ -95,28 +105,33 @@ def search_screenings(program_id):
         get_current_user(),
     )
 
-    serialized = [
-        _serialize_screening(screening)
-        for screening in results
-    ]
-
-    return jsonify(results=serialized), 200
+    return jsonify(
+        results=results
+    ), 200
 
 
 @screenings_bp.get("/<screening_id>")
-def get_screening(program_id, screening_id):
-    screening = screening_service.get_screening(
+def get_screening(
+    program_id,
+    screening_id,
+):
+    result = screening_service.get_screening(
         program_id,
         screening_id,
         get_current_user(),
     )
 
-    return jsonify(_serialize_screening(screening)), 200
+    return jsonify(result), 200
 
 
 @screenings_bp.put("/<screening_id>")
-def update_screening(program_id, screening_id):
-    payload = request.get_json(silent=True) or {}
+def update_screening(
+    program_id,
+    screening_id,
+):
+    payload = request.get_json(
+        silent=True
+    ) or {}
 
     screening = screening_service.update_screening(
         program_id,
@@ -125,22 +140,32 @@ def update_screening(program_id, screening_id):
         get_current_user(),
     )
 
-    return jsonify(_serialize_screening(screening)), 200
+    return jsonify(
+        _serialize_screening(screening)
+    ), 200
 
 
 @screenings_bp.post("/<screening_id>/submit")
-def submit_screening(program_id, screening_id):
+def submit_screening(
+    program_id,
+    screening_id,
+):
     screening = screening_service.submit_screening(
         program_id,
         screening_id,
         get_current_user(),
     )
 
-    return jsonify(_serialize_screening(screening)), 200
+    return jsonify(
+        _serialize_screening(screening)
+    ), 200
 
 
 @screenings_bp.delete("/<screening_id>")
-def withdraw_screening(program_id, screening_id):
+def withdraw_screening(
+    program_id,
+    screening_id,
+):
     screening_service.withdraw_screening(
         program_id,
         screening_id,
@@ -151,13 +176,20 @@ def withdraw_screening(program_id, screening_id):
 
 
 @screenings_bp.post("/<screening_id>/handler")
-def assign_handler(program_id, screening_id):
-    payload = request.get_json(silent=True) or {}
+def assign_handler(
+    program_id,
+    screening_id,
+):
+    payload = request.get_json(
+        silent=True
+    ) or {}
 
     user_id = payload.get("userId")
 
     if not user_id:
-        return jsonify(error="userId is required"), 400
+        return jsonify(
+            error="userId is required"
+        ), 400
 
     screening = screening_service.assign_handler(
         program_id,
@@ -166,12 +198,19 @@ def assign_handler(program_id, screening_id):
         get_current_user(),
     )
 
-    return jsonify(_serialize_screening(screening)), 200
+    return jsonify(
+        _serialize_screening(screening)
+    ), 200
 
 
 @screenings_bp.post("/<screening_id>/review")
-def review_screening(program_id, screening_id):
-    payload = request.get_json(silent=True) or {}
+def review_screening(
+    program_id,
+    screening_id,
+):
+    payload = request.get_json(
+        silent=True
+    ) or {}
 
     screening = screening_service.review_screening(
         program_id,
@@ -180,12 +219,19 @@ def review_screening(program_id, screening_id):
         get_current_user(),
     )
 
-    return jsonify(_serialize_screening(screening)), 200
+    return jsonify(
+        _serialize_screening(screening)
+    ), 200
 
 
 @screenings_bp.post("/<screening_id>/approve")
-def approve_screening(program_id, screening_id):
-    payload = request.get_json(silent=True) or {}
+def approve_screening(
+    program_id,
+    screening_id,
+):
+    payload = request.get_json(
+        silent=True
+    ) or {}
 
     screening = screening_service.approve_screening(
         program_id,
@@ -194,12 +240,19 @@ def approve_screening(program_id, screening_id):
         get_current_user(),
     )
 
-    return jsonify(_serialize_screening(screening)), 200
+    return jsonify(
+        _serialize_screening(screening)
+    ), 200
 
 
 @screenings_bp.post("/<screening_id>/reject")
-def reject_screening(program_id, screening_id):
-    payload = request.get_json(silent=True) or {}
+def reject_screening(
+    program_id,
+    screening_id,
+):
+    payload = request.get_json(
+        silent=True
+    ) or {}
 
     screening = screening_service.reject_screening(
         program_id,
@@ -208,12 +261,19 @@ def reject_screening(program_id, screening_id):
         get_current_user(),
     )
 
-    return jsonify(_serialize_screening(screening)), 200
+    return jsonify(
+        _serialize_screening(screening)
+    ), 200
 
 
 @screenings_bp.post("/<screening_id>/final-submit")
-def final_submit_screening(program_id, screening_id):
-    payload = request.get_json(silent=True) or {}
+def final_submit_screening(
+    program_id,
+    screening_id,
+):
+    payload = request.get_json(
+        silent=True
+    ) or {}
 
     screening = screening_service.final_submit_screening(
         program_id,
@@ -222,15 +282,22 @@ def final_submit_screening(program_id, screening_id):
         get_current_user(),
     )
 
-    return jsonify(_serialize_screening(screening)), 200
+    return jsonify(
+        _serialize_screening(screening)
+    ), 200
 
 
 @screenings_bp.post("/<screening_id>/accept")
-def accept_screening(program_id, screening_id):
+def accept_screening(
+    program_id,
+    screening_id,
+):
     screening = screening_service.accept_screening(
         program_id,
         screening_id,
         get_current_user(),
     )
 
-    return jsonify(_serialize_screening(screening)), 200
+    return jsonify(
+        _serialize_screening(screening)
+    ), 200
