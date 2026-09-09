@@ -1235,3 +1235,239 @@ def test_get_screening_unknown_id(
             "does-not-exist",
             programmer,
         )
+def test_get_screening_public_view_is_redacted(
+    db,
+    user_factory,
+    service,
+    program_service,
+):
+    programmer = user_factory(username="programmer")
+    submitter = user_factory(username="submitter")
+
+    program = _create_program(
+        program_service,
+        programmer,
+    )
+
+    screening = _create_screening(
+        service,
+        program,
+        submitter,
+    )
+
+    screening.state = ScreeningState.SCHEDULED
+    program.state = ProgramState.ANNOUNCED
+
+    db.session.commit()
+
+    result = service.get_screening(
+        program.id,
+        screening.id,
+        None,
+    )
+
+    assert result["filmTitle"] == "Interstellar"
+    assert "filmGenres" in result
+    assert "auditoriumName" in result
+    assert "startTime" in result
+
+    assert "reviewScore" not in result
+    assert "reviewComments" not in result
+    assert "submitterId" not in result
+    assert "handlerId" not in result
+    assert "rejectionReason" not in result
+
+
+def test_get_screening_submitter_gets_full_view(
+    db,
+    user_factory,
+    service,
+    program_service,
+):
+    programmer = user_factory(username="programmer")
+    submitter = user_factory(username="submitter")
+
+    program = _create_program(
+        program_service,
+        programmer,
+    )
+
+    screening = _create_screening(
+        service,
+        program,
+        submitter,
+    )
+
+    screening.review_score = 8.5
+    screening.review_comments = "Good"
+
+    db.session.commit()
+
+    result = service.get_screening(
+        program.id,
+        screening.id,
+        submitter,
+    )
+
+    assert result["submitterId"] == submitter.id
+    assert result["reviewScore"] == 8.5
+    assert result["reviewComments"] == "Good"
+
+
+def test_get_screening_outsider_cannot_view_private_screening(
+    db,
+    user_factory,
+    service,
+    program_service,
+):
+    programmer = user_factory(username="programmer")
+    submitter = user_factory(username="submitter")
+    outsider = user_factory(username="outsider")
+
+    program = _create_program(
+        program_service,
+        programmer,
+    )
+
+    screening = _create_screening(
+        service,
+        program,
+        submitter,
+    )
+
+    with pytest.raises(NotFoundError):
+        service.get_screening(
+            program.id,
+            screening.id,
+            outsider,
+        )
+
+
+def test_search_screenings_visitor_only_sees_public_screenings(
+    db,
+    user_factory,
+    service,
+    program_service,
+):
+    programmer = user_factory(username="programmer")
+    submitter = user_factory(username="submitter")
+
+    program = _create_program(
+        program_service,
+        programmer,
+    )
+
+    public_screening = _create_screening(
+        service,
+        program,
+        submitter,
+        filmTitle="Public Film",
+    )
+
+    private_screening = _create_screening(
+        service,
+        program,
+        submitter,
+        filmTitle="Private Film",
+    )
+
+    public_screening.state = ScreeningState.SCHEDULED
+    private_screening.state = ScreeningState.APPROVED
+    program.state = ProgramState.ANNOUNCED
+
+    db.session.commit()
+
+    results = service.search_screenings(
+        program.id,
+        {},
+        None,
+    )
+
+    assert len(results) == 1
+    assert results[0]["filmTitle"] == "Public Film"
+
+
+def test_search_screenings_date_range(
+    db,
+    user_factory,
+    service,
+    program_service,
+):
+    programmer = user_factory(username="programmer")
+    submitter = user_factory(username="submitter")
+
+    program = _create_program(
+        program_service,
+        programmer,
+    )
+
+    _create_screening(
+        service,
+        program,
+        submitter,
+        filmTitle="Early Film",
+        startTime="2026-05-01T18:00:00",
+    )
+
+    _create_screening(
+        service,
+        program,
+        submitter,
+        filmTitle="Late Film",
+        startTime="2026-06-01T18:00:00",
+    )
+
+    results = service.search_screenings(
+        program.id,
+        {
+            "dateFrom": "2026-05-15T00:00:00",
+            "dateTo": "2026-06-15T23:59:59",
+        },
+        submitter,
+    )
+
+    assert len(results) == 1
+    assert results[0]["filmTitle"] == "Late Film"
+
+
+def test_search_screenings_timetable_sorting(
+    db,
+    user_factory,
+    service,
+    program_service,
+):
+    programmer = user_factory(username="programmer")
+    submitter = user_factory(username="submitter")
+
+    program = _create_program(
+        program_service,
+        programmer,
+    )
+
+    _create_screening(
+        service,
+        program,
+        submitter,
+        filmTitle="Later Film",
+        startTime="2026-05-10T21:00:00",
+    )
+
+    _create_screening(
+        service,
+        program,
+        submitter,
+        filmTitle="Earlier Film",
+        startTime="2026-05-10T17:00:00",
+    )
+
+    results = service.search_screenings(
+        program.id,
+        {
+            "view": "timetable",
+        },
+        submitter,
+    )
+
+    assert len(results) == 2
+    assert results[0]["filmTitle"] == "Earlier Film"
+    assert results[1]["filmTitle"] == "Later Film"
