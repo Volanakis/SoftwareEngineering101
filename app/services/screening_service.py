@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 
 from app.extensions import db
@@ -11,6 +12,9 @@ from app.services.errors import (
     ValidationError,
 )
 from app.services.program_service import register_decision_hook
+
+
+logger = logging.getLogger(__name__)
 
 
 class ScreeningService:
@@ -72,6 +76,13 @@ class ScreeningService:
         db.session.add(screening)
         db.session.commit()
 
+        logger.info(
+            "Screening created | screening_id=%s | program_id=%s | submitter_id=%s",
+            screening.id,
+            program.id,
+            requester.id,
+        )
+
         return screening
 
     def update_screening(
@@ -130,6 +141,12 @@ class ScreeningService:
 
         db.session.commit()
 
+        logger.info(
+            "Screening updated | screening_id=%s | submitter_id=%s",
+            screening.id,
+            requester.id,
+        )
+
         return screening
 
     def submit_screening(
@@ -178,6 +195,13 @@ class ScreeningService:
 
         db.session.commit()
 
+        logger.info(
+            "Screening submitted | screening_id=%s | program_id=%s | submitter_id=%s",
+            screening.id,
+            program.id,
+            requester.id,
+        )
+
         return screening
 
     def withdraw_screening(
@@ -198,8 +222,17 @@ class ScreeningService:
                 "Only a CREATED screening can be withdrawn"
             )
 
+        screening_id_value = screening.id
+        submitter_id = requester.id
+
         db.session.delete(screening)
         db.session.commit()
+
+        logger.info(
+            "Screening withdrawn | screening_id=%s | submitter_id=%s",
+            screening_id_value,
+            submitter_id,
+        )
 
     def assign_handler(
         self,
@@ -246,6 +279,14 @@ class ScreeningService:
         screening.handler = user
 
         db.session.commit()
+
+        logger.info(
+            "Handler assigned | screening_id=%s | program_id=%s | handler_id=%s | programmer_id=%s",
+            screening.id,
+            program.id,
+            user.id,
+            requester.id,
+        )
 
         return screening
 
@@ -302,6 +343,13 @@ class ScreeningService:
 
         db.session.commit()
 
+        logger.info(
+            "Screening reviewed | screening_id=%s | handler_id=%s | score=%s",
+            screening.id,
+            requester.id,
+            screening.review_score,
+        )
+
         return screening
 
     def approve_screening(
@@ -332,6 +380,12 @@ class ScreeningService:
         screening.state = ScreeningState.APPROVED
 
         db.session.commit()
+
+        logger.info(
+            "Screening approved | screening_id=%s | programmer_id=%s",
+            screening.id,
+            requester.id,
+        )
 
         return screening
 
@@ -376,6 +430,13 @@ class ScreeningService:
         screening.state = ScreeningState.REJECTED
 
         db.session.commit()
+
+        logger.info(
+            "Screening rejected | screening_id=%s | programmer_id=%s | reason=%s",
+            screening.id,
+            requester.id,
+            screening.rejection_reason,
+        )
 
         return screening
 
@@ -442,6 +503,12 @@ class ScreeningService:
 
         db.session.commit()
 
+        logger.info(
+            "Screening final submitted | screening_id=%s | submitter_id=%s",
+            screening.id,
+            requester.id,
+        )
+
         return screening
 
     def accept_screening(
@@ -478,6 +545,12 @@ class ScreeningService:
         screening.state = ScreeningState.SCHEDULED
 
         db.session.commit()
+
+        logger.info(
+            "Screening scheduled | screening_id=%s | programmer_id=%s",
+            screening.id,
+            requester.id,
+        )
 
         return screening
 
@@ -784,6 +857,12 @@ def _auto_reject_unsubmitted_screenings(program):
         screening.state = ScreeningState.REJECTED
         screening.rejection_reason = (
             "Automatically rejected: final submission was not completed"
+        )
+
+        logger.info(
+            "Screening auto-rejected | screening_id=%s | program_id=%s",
+            screening.id,
+            program.id,
         )
 
 
