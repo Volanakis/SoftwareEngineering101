@@ -4,7 +4,17 @@ import pytest
 
 from app import create_app
 from app.extensions import db as _db
+from app.extensions import limiter
 from app.models.user import User
+
+
+@pytest.fixture(autouse=True)
+def _reset_rate_limiter():
+    try:
+        limiter.reset()
+    except Exception:
+        pass
+    yield
 
 
 @pytest.fixture

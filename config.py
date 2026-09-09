@@ -17,7 +17,6 @@ class DevelopmentConfig(Config):
 class TestingConfig(Config):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = os.environ.get("TEST_DATABASE_URL", "sqlite:///:memory:")
-    RATELIMIT_ENABLED = False
 
 
 class ProductionConfig(Config):
