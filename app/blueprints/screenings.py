@@ -270,6 +270,7 @@ def reject_screening(
 
 
 @screenings_bp.post("/<screening_id>/final-submit")
+@limiter.limit("10 per minute")
 def final_submit_screening(
     program_id,
     screening_id,

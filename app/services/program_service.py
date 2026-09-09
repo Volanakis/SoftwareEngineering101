@@ -1,9 +1,12 @@
+import logging
 from datetime import date
 
 from app.extensions import db
 from app.models.program import Program, ProgramRole, ProgramState, RoleType
 from app.models.user import User
 from app.services.errors import AuthorizationError, ConflictError, NotFoundError, ValidationError
+
+logger = logging.getLogger(__name__)
 
 REQUIRED_CREATE_FIELDS = ("name", "description", "startDate", "endDate")
 
@@ -53,6 +56,13 @@ class ProgramService:
         db.session.add(ProgramRole(program=program, user=creator, role_type=RoleType.PROGRAMMER))
         db.session.commit()
 
+        logger.info(
+            "Program created | program_id=%s | name=%s | creator_id=%s",
+            program.id,
+            program.name,
+            creator.id,
+        )
+
         return program
 
     def update_program(self, program_id, data, requester):
@@ -93,6 +103,14 @@ class ProgramService:
             program.end_date = _as_date(data["endDate"])
 
         db.session.commit()
+
+        logger.info(
+            "Program updated | program_id=%s | fields=%s | requester_id=%s",
+            program.id,
+            ",".join(sorted(data.keys())) or "none",
+            requester.id,
+        )
+
         return program
 
     def add_programmer(self, program_id, user_id, requester):
@@ -102,6 +120,14 @@ class ProgramService:
 
         db.session.add(ProgramRole(program=program, user=user, role_type=RoleType.PROGRAMMER))
         db.session.commit()
+
+        logger.info(
+            "Programmer added | program_id=%s | user_id=%s | requester_id=%s",
+            program.id,
+            user.id,
+            requester.id,
+        )
+
         return program
 
     def add_staff(self, program_id, user_id, requester):
@@ -115,6 +141,14 @@ class ProgramService:
 
         db.session.add(ProgramRole(program=program, user=user, role_type=RoleType.STAFF))
         db.session.commit()
+
+        logger.info(
+            "Staff added | program_id=%s | user_id=%s | requester_id=%s",
+            program.id,
+            user.id,
+            requester.id,
+        )
+
         return program
 
     def _require_programmer_and_target_user(self, program_id, user_id, requester):
@@ -197,8 +231,15 @@ class ProgramService:
         if program.state != ProgramState.CREATED:
             raise ConflictError("Program can only be deleted while in CREATED state")
 
+        deleted_id = program.id
         db.session.delete(program)
         db.session.commit()
+
+        logger.info(
+            "Program deleted | program_id=%s | requester_id=%s",
+            deleted_id,
+            requester.id,
+        )
 
     def transition_program(self, program_id, target_state, requester):
         """ΛΑ-2.8: only a PROGRAMMER may transition, and only to the single next state
@@ -232,6 +273,7 @@ class ProgramService:
                 f"'{next_state.value}' next (no rollback or skip)"
             )
 
+        previous_state = program.state
         program.state = next_state
 
         if next_state == ProgramState.DECISION:
@@ -239,6 +281,15 @@ class ProgramService:
                 hook(program)
 
         db.session.commit()
+
+        logger.info(
+            "Program state changed | program_id=%s | from=%s | to=%s | requester_id=%s",
+            program.id,
+            previous_state.value,
+            next_state.value,
+            requester.id,
+        )
+
         return program
 
 
