@@ -10,6 +10,7 @@ from app.services.errors import (
     NotFoundError,
     ValidationError,
 )
+from app.services.program_service import register_decision_hook
 
 
 class ScreeningService:
@@ -46,7 +47,12 @@ class ScreeningService:
             screening.film_genres = data["filmGenres"]
 
         if "filmDurationMinutes" in data:
-            duration = int(data["filmDurationMinutes"])
+            try:
+                duration = int(data["filmDurationMinutes"])
+            except (TypeError, ValueError):
+                raise ValidationError(
+                    "filmDurationMinutes must be an integer"
+                )
 
             if duration <= 0:
                 raise ValidationError(
@@ -233,8 +239,8 @@ class ScreeningService:
         ).first()
 
         if role is None:
-            raise AuthorizationError(
-                "User is not STAFF of this program"
+            raise NotFoundError(
+                f"User '{user_id}' is not STAFF of program '{program_id}'"
             )
 
         screening.handler = user
@@ -286,7 +292,9 @@ class ScreeningService:
         try:
             score = float(data["score"])
         except (TypeError, ValueError):
-            raise ValidationError("score must be numeric")
+            raise ValidationError(
+                "score must be numeric"
+            )
 
         screening.review_score = score
         screening.review_comments = data["comments"]
@@ -399,6 +407,10 @@ class ScreeningService:
             )
 
         if "filmTitle" in data:
+            if not data["filmTitle"]:
+                raise ValidationError(
+                    "filmTitle cannot be empty"
+                )
             screening.film_title = data["filmTitle"]
 
         if "filmCast" in data:
@@ -573,7 +585,10 @@ class ScreeningService:
             screening
             for screening in screenings
             if (
-                self._has_full_access(screening, requester)
+                self._has_full_access(
+                    screening,
+                    requester,
+                )
                 or self._is_public(screening)
             )
         ]
@@ -714,17 +729,12 @@ class ScreeningService:
                 "rejectionReason": (
                     screening.rejection_reason
                 ),
-                "finalSubmitted": (
-                    screening.final_submitted
-                ),
-                "approvalNotes": (
-                    screening.approval_notes
-                ),
             }
 
         return {
             "id": screening.id,
             "filmTitle": screening.film_title,
+            "filmCast": screening.film_cast,
             "filmGenres": screening.film_genres,
             "auditoriumName": screening.auditorium_name,
             "startTime": (
@@ -732,6 +742,12 @@ class ScreeningService:
                 if screening.start_time
                 else None
             ),
+            "endTime": (
+                screening.end_time.isoformat()
+                if screening.end_time
+                else None
+            ),
+            "state": screening.state.value,
         }
 
     def _parse_datetime(
@@ -741,15 +757,39 @@ class ScreeningService:
         if isinstance(value, datetime):
             return value
 
+        if not isinstance(value, str):
+            raise ValidationError(
+                "Invalid datetime format"
+            )
+
         try:
             return datetime.fromisoformat(
                 value.replace("Z", "+00:00")
             )
 
-        except (ValueError, AttributeError):
+        except ValueError:
             raise ValidationError(
                 "Invalid datetime format"
             )
+
+
+def _auto_reject_unsubmitted_screenings(program):
+    screenings = Screening.query.filter_by(
+        program_id=program.id,
+        state=ScreeningState.APPROVED,
+        final_submitted=False,
+    ).all()
+
+    for screening in screenings:
+        screening.state = ScreeningState.REJECTED
+        screening.rejection_reason = (
+            "Automatically rejected: final submission was not completed"
+        )
+
+
+register_decision_hook(
+    _auto_reject_unsubmitted_screenings
+)
 
 
 screening_service = ScreeningService()
