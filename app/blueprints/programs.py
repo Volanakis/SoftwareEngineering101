@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from app.extensions import limiter
 
 from app.auth import get_current_user
 from app.services.errors import AuthorizationError, ConflictError, NotFoundError, ValidationError
@@ -40,6 +41,7 @@ def create_program():
 
 
 @programs_bp.get("")
+@limiter.limit("30 per minute")
 def search_programs():
     """ΛΑ-2.5, activity 09."""
     results = program_service.search_programs(request.args.to_dict(), get_current_user())
