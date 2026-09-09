@@ -30,8 +30,8 @@ Backend διαχείρισης κινηματογραφικών προγραμμ
 ## Κατάσταση Υλοποίησης (Τρίτο Μέρος)
 
 - ✅ **Person A — Διαχείριση Προγράμματος**: μοντέλα, service layer, state machine, Flask blueprint, tests — ολοκληρωμένο.
-- 🔲 **Person B — Διαχείριση Προβολών**: δεν έχει ξεκινήσει.
-- 🔲 **Cross-cutting** (rate limiting, audit logging, SQL scripts, τελικό integration pass): εκκρεμεί.
+- ✅ **Person B — Διαχείριση Προβολών**: `Screening` μοντέλο, service layer, redaction ανά ρόλο, αυτόματη απόρριψη στο DECISION (decision hook), 13 Flask endpoints, tests — ολοκληρωμένο. Η πλήρης σουίτα (160 tests) περνάει.
+- 🟡 **Cross-cutting**: rate limiting μερικώς (εφαρμοσμένο σε search + `submit`, λείπει `final-submit` + storage backend)· logging μερικώς (πλήρες στο `screening_service`, καθόλου στο `program_service`)· εκκρεμούν SQL scripts δημιουργίας βάσης, συνδυασμένο integration pass, test documentation για την αναφορά.
 
 Πλήρης, ενημερωμένος καταμερισμός εργασιών: [`TASKS.md`](TASKS.md). Συμφωνημένο REST contract: [`API_CONTRACT.md`](API_CONTRACT.md). Οδηγός συνεργασίας/branching: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
@@ -64,12 +64,14 @@ Backend διαχείρισης κινηματογραφικών προγραμμ
 ├── .env.example             # template μεταβλητών περιβάλλοντος (FLASK_ENV, SECRET_KEY, DATABASE_URL)
 ├── config.py                # Development/Testing/Production configuration classes
 ├── run.py                   # entry point (flask dev server)
+├── init_db.py               # δημιουργία schema μέσω db.create_all() (dev/test)
 ├── app/                     # Flask εφαρμογή
 │   ├── auth.py                # session-based login, login_required, requires_role (RBAC)
-│   ├── extensions.py          # SQLAlchemy db instance
-│   ├── blueprints/            # REST resources ανά πόρο (π.χ. programs.py)
-│   ├── models/                 # SQLAlchemy μοντέλα (User, Program, ProgramRole, ...)
-│   └── services/                # business logic, state machines, redaction (π.χ. program_service.py)
+│   ├── extensions.py          # SQLAlchemy db instance + Flask-Limiter instance
+│   ├── logging_config.py      # file logging (logs/app.log) — μερικό audit trail (ΜΛΑ-5)
+│   ├── blueprints/            # REST resources ανά πόρο (programs.py, screenings.py)
+│   ├── models/                 # SQLAlchemy μοντέλα (User, Program, ProgramRole, Screening)
+│   └── services/                # business logic, state machines, redaction (program_service.py, screening_service.py)
 ├── tests/                   # pytest, κοινά fixtures στο conftest.py
 ├── .github/workflows/       # CI pipeline (pytest σε κάθε push/PR προς main)
 └── diagrams/                # Δεύτερο Μέρος Εργασίας: όλα τα διαγράμματα σχεδίασης (.md/Mermaid)
