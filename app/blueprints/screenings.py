@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify, request
+from app.extensions import limiter
 
 from app.auth import get_current_user
 from app.services.errors import (
@@ -98,6 +99,7 @@ def create_screening(program_id):
 
 
 @screenings_bp.get("")
+@limiter.limit("30 per minute")
 def search_screenings(program_id):
     results = screening_service.search_screenings(
         program_id,
@@ -146,6 +148,7 @@ def update_screening(
 
 
 @screenings_bp.post("/<screening_id>/submit")
+@limiter.limit("10 per minute")
 def submit_screening(
     program_id,
     screening_id,
