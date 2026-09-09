@@ -31,7 +31,7 @@ Backend διαχείρισης κινηματογραφικών προγραμμ
 
 - ✅ **Person A — Διαχείριση Προγράμματος**: μοντέλα, service layer, state machine, Flask blueprint, tests — ολοκληρωμένο.
 - ✅ **Person B — Διαχείριση Προβολών**: `Screening` μοντέλο, service layer, redaction ανά ρόλο, αυτόματη απόρριψη στο DECISION (decision hook), 13 Flask endpoints, tests — ολοκληρωμένο. Η πλήρης σουίτα (160 tests) περνάει.
-- 🟡 **Cross-cutting**: rate limiting μερικώς (εφαρμοσμένο σε search + `submit`, λείπει `final-submit` + storage backend)· logging μερικώς (πλήρες στο `screening_service`, καθόλου στο `program_service`)· εκκρεμούν SQL scripts δημιουργίας βάσης, συνδυασμένο integration pass, test documentation για την αναφορά.
+- ✅ **Cross-cutting**: rate limiting (Flask-Limiter σε search + `submit` + `final-submit`, ρυθμιζόμενο storage backend)· logging & audit trail (`logs/app.log`, κάθε ενέργεια και των δύο services)· SQL scripts δημιουργίας βάσης (`sql/`)· τελικό integration pass (`tests/test_integration_lifecycle.py`)· test documentation ([`tests/TEST_PLAN.md`](tests/TEST_PLAN.md)). Πλήρης σουίτα: 170 tests, όλα πράσινα.
 
 Πλήρης, ενημερωμένος καταμερισμός εργασιών: [`TASKS.md`](TASKS.md). Συμφωνημένο REST contract: [`API_CONTRACT.md`](API_CONTRACT.md). Οδηγός συνεργασίας/branching: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
@@ -46,7 +46,7 @@ Backend διαχείρισης κινηματογραφικών προγραμμ
 | Πρόσβαση σε δεδομένα / ORM | **SQLAlchemy** |
 | Διαχείριση εξαρτήσεων | **requirements.txt** + venv/pip (Poetry εξετάστηκε αρχικά ως επιλογή, βλ. εκφώνημα — προτιμήθηκε το απλούστερο requirements.txt) |
 | Unit testing | **pytest** (αντίστοιχο του JUnit) |
-| Rate limiting | **Flask-Limiter** (προγραμματισμένο, δεν έχει ενσωματωθεί ακόμα) |
+| Rate limiting | **Flask-Limiter** (search + submission endpoints· storage μέσω `RATELIMIT_STORAGE_URI`) |
 | Βάση δεδομένων | SQLite (dev/test) — σχεσιακή βάση γενικά, κοινή με το User Management System για τον πίνακα Users |
 | Έλεγχος εκδόσεων | Git + ιδιωτικό αποθετήριο GitHub, CI μέσω GitHub Actions |
 
@@ -68,11 +68,12 @@ Backend διαχείρισης κινηματογραφικών προγραμμ
 ├── app/                     # Flask εφαρμογή
 │   ├── auth.py                # session-based login, login_required, requires_role (RBAC)
 │   ├── extensions.py          # SQLAlchemy db instance + Flask-Limiter instance
-│   ├── logging_config.py      # file logging (logs/app.log) — μερικό audit trail (ΜΛΑ-5)
+│   ├── logging_config.py      # audit trail logging → logs/app.log (ΜΛΑ-5)
 │   ├── blueprints/            # REST resources ανά πόρο (programs.py, screenings.py)
 │   ├── models/                 # SQLAlchemy μοντέλα (User, Program, ProgramRole, Screening)
 │   └── services/                # business logic, state machines, redaction (program_service.py, screening_service.py)
-├── tests/                   # pytest, κοινά fixtures στο conftest.py
+├── sql/                     # hand-written DDL: schema.sql, drop_all.sql, seed.sql (+ README)
+├── tests/                   # pytest· conftest.py fixtures· TEST_PLAN.md (κάλυψη για το report)
 ├── .github/workflows/       # CI pipeline (pytest σε κάθε push/PR προς main)
 └── diagrams/                # Δεύτερο Μέρος Εργασίας: όλα τα διαγράμματα σχεδίασης (.md/Mermaid)
     └── README.md              # αναλυτική τεκμηρίωση κάθε διαγράμματος (στα Ελληνικά)

@@ -53,8 +53,8 @@
 
 ## Cross-cutting
 
-- [~] Rate limiting με Flask-Limiter σε submission/search endpoints (ΜΛΑ-3.3) — **μερικώς**: εφαρμοσμένο σε `GET /programs`, `GET .../screenings`, `POST .../submit`. Εκκρεμούν: `POST .../final-submit` (χωρίς `@limiter.limit`, ενώ το `API_CONTRACT.md` §5 το ζητά), ρύθμιση storage backend (τώρα in-memory), προσθήκη `Flask-Limiter` σε τοπικά περιβάλλοντα (είναι στο `requirements.txt`).
-- [~] Logging & audit trail component (ΜΛΑ-5) — **μερικώς**: `logging_config.py` + πλήρες logging κάθε ενέργειας στο `screening_service.py`. Εκκρεμεί: το `program_service.py` δεν κάνει κανένα logging (create/update/roles/transitions/delete χωρίς audit εγγραφή)· `logging_config.py` έχει no-op `if/else`· δεν υπάρχει ξεχωριστό audit-trail store (μόνο flat `logs/app.log`).
-- [ ] SQL scripts δημιουργίας βάσης — **δεν έχει ξεκινήσει**: υπάρχει μόνο το `init_db.py` (`db.create_all()`), κανένα `.sql` αρχείο.
-- [~] Τελικό integration test pass και οι δύο μαζί — **μερικώς**: `tests/test_screening_workflow.py` καλύπτει end-to-end τη ροή προβολής· δεν υπάρχει συνδυασμένο program+screening integration test ούτε κοινό sign-off.
-- [ ] Test documentation (ποια μέρη καλύπτονται, ποια test cases, preconditions) για το report — **δεν έχει ξεκινήσει**.
+- [x] Rate limiting με Flask-Limiter σε submission/search endpoints (ΜΛΑ-3.3) — `GET /programs`, `GET .../screenings`, `POST .../submit`, `POST .../final-submit`. Storage backend ρυθμίσιμο μέσω `RATELIMIT_STORAGE_URI` (default `memory://`, `redis://…` για production). Tests: `tests/test_rate_limiting.py`.
+- [x] Logging & audit trail component (ΜΛΑ-5) — `logging_config.py` (idempotent, γράφει audit trail στο `logs/app.log`) + `logger.info` σε κάθε ενέργεια και των **δύο** services (`program_service`: create/update/roles/delete/transition· `screening_service`: όλες οι μεταβάσεις + auto-reject). Επαλήθευση στο `tests/test_integration_lifecycle.py`.
+- [x] SQL scripts δημιουργίας βάσης — `sql/schema.sql`, `sql/drop_all.sql`, `sql/seed.sql` + `sql/README.md`. Συγχρονισμένα με τα ORM models, επαληθεύονται από `tests/test_sql_schema.py`.
+- [x] Τελικό integration test pass και οι δύο μαζί — `tests/test_screening_workflow.py` (happy path CREATED→ANNOUNCED) + `tests/test_integration_lifecycle.py` (ένα πρόγραμμα, 3 προβολές → SCHEDULED / manual REJECTED / auto REJECTED, HTTP-level, και τα δύο blueprints). Πλήρης σουίτα: **170 tests, όλα πράσινα**.
+- [x] Test documentation (ποια μέρη καλύπτονται, ποια test cases, preconditions) για το report — [`tests/TEST_PLAN.md`](tests/TEST_PLAN.md): πίνακας κάλυψης ανά ΛΑ/ΜΛΑ, περιγραφή ανά αρχείο, fixtures/preconditions, γνωστά κενά.
