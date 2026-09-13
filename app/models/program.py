@@ -33,10 +33,19 @@ class Program(db.Model):
         db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
     )
     state = db.Column(db.Enum(ProgramState), default=ProgramState.CREATED, nullable=False)
+    # Nullable only for backwards-compatible database migration. Programs created
+    # through ProgramService always set this field.
+    creator_id = db.Column(
+        db.String(36), db.ForeignKey("users.id"), nullable=True
+    )
 
     roles = db.relationship(
         "ProgramRole", back_populates="program", cascade="all, delete-orphan"
     )
+    screenings = db.relationship(
+        "Screening", back_populates="program", cascade="all, delete-orphan"
+    )
+    creator = db.relationship("User", foreign_keys=[creator_id])
 
     @property
     def programmers(self):

@@ -20,7 +20,14 @@ def configure_logging(app):
 
     app.logger.setLevel(logging.INFO)
 
-    if not app.logger.handlers:
+    absolute_log_file = os.path.abspath(log_file)
+    has_file_handler = any(
+        isinstance(handler, logging.FileHandler)
+        and handler.baseFilename == absolute_log_file
+        for handler in app.logger.handlers
+    )
+
+    if not has_file_handler:
         app.logger.addHandler(file_handler)
     else:
-        app.logger.addHandler(file_handler)
+        file_handler.close()

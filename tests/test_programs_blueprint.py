@@ -1,3 +1,6 @@
+from app.models.program import Program, ProgramState
+
+
 def _log_in(client, user):
     with client.session_transaction() as sess:
         sess["user_id"] = user.id
@@ -57,6 +60,10 @@ def test_get_program_redacted_for_visitor(db, user_factory, client):
     creator = user_factory(username="creator")
     _log_in(client, creator)
     created = client.post("/programs", json=_valid_payload()).get_json()
+
+    program = db.session.get(Program, created["id"])
+    program.state = ProgramState.ANNOUNCED
+    db.session.commit()
 
     with client.session_transaction() as sess:
         sess.clear()

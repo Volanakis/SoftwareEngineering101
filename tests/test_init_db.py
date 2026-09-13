@@ -1,7 +1,11 @@
-from sqlalchemy import inspect
+from pathlib import Path
+import uuid
+
+from sqlalchemy import inspect, text
 
 from app import create_app
 from app.extensions import db
+from init_db import migrate_legacy_schema
 
 
 def test_database_initialization():
@@ -17,3 +21,38 @@ def test_database_initialization():
         assert "programs" in tables
         assert "program_roles" in tables
         assert "screenings" in tables
+
+
+def test_legacy_database_gets_creator_column(monkeypatch):
+    database_file = Path("instance") / f"legacy-{uuid.uuid4().hex}.db"
+    database_path = database_file.resolve().as_posix()
+    monkeypatch.setenv("TEST_DATABASE_URL", f"sqlite:///{database_path}")
+    app = create_app("testing")
+
+    try:
+        with app.app_context():
+            with db.engine.begin() as connection:
+                connection.execute(
+                    text(
+                        "CREATE TABLE programs ("
+                        "id VARCHAR(36) PRIMARY KEY, name VARCHAR(120) UNIQUE NOT NULL, "
+                        "description TEXT NOT NULL, start_date DATE NOT NULL, "
+                        "end_date DATE NOT NULL, creation_date DATETIME NOT NULL, "
+                        "state VARCHAR(32) NOT NULL)"
+                    )
+                )
+
+            db.create_all()
+            assert "creator_id" not in {
+                column["name"] for column in inspect(db.engine).get_columns("programs")
+            }
+
+            migrate_legacy_schema()
+
+            assert "creator_id" in {
+                column["name"] for column in inspect(db.engine).get_columns("programs")
+            }
+            db.session.remove()
+            db.engine.dispose()
+    finally:
+        database_file.unlink(missing_ok=True)

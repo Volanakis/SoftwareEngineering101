@@ -57,7 +57,7 @@ Responses:
 
 ### DTO schema (`ProgramDTO`)
 
-Πλήρες σχήμα (PROGRAMMER/STAFF του συγκεκριμένου προγράμματος βλέπουν όλα τα πεδία):
+Πλήρες σχήμα (μόνο PROGRAMMER του συγκεκριμένου προγράμματος βλέπει όλα τα πεδία):
 
 ```json
 {
@@ -73,7 +73,7 @@ Responses:
 }
 ```
 
-Public tier (VISITOR, ή USER χωρίς ρόλο σε αυτό το πρόγραμμα — ΛΑ-2.6): μόνο `id`, `name`, `description`, `startDate`, `endDate`, `state`. Τα `creationDate`, `programmers`, `staff` αποκρύπτονται.
+Public tier (VISITOR, USER ή STAFF — μόνο όταν το πρόγραμμα είναι `ANNOUNCED`): `id`, `name`, `description`, `startDate`, `endDate`, `state`, `programmerNames`. Τα `creationDate`, πλήρη `programmers` και `staff` αποκρύπτονται. Μη ανακοινωμένο πρόγραμμα επιστρέφεται μόνο στους PROGRAMMERs του· για τους υπόλοιπους συμπεριφέρεται ως μη διαθέσιμο (`404` σε view, παράλειψη από search).
 
 ### `POST /programs`
 
@@ -97,7 +97,7 @@ Responses:
 Query params (όλα προαιρετικά, συνδυάζονται με AND): `name`, `description`, `startDateFrom`, `startDateTo`, `endDateFrom`, `endDateTo`, `filmTitle`, `auditorium` (τα δύο τελευταία φιλτράρουν βάσει screenings του προγράμματος).
 
 Responses:
-- `200 OK` → `{ "results": [ProgramDTO, ...] }` — redacted ανά ρόλο, χωρίς κριτήρια επιστρέφονται όλα, ταξινόμηση `startDate` → `name`.
+- `200 OK` → `{ "results": [ProgramDTO, ...] }` — redacted ανά ρόλο, χωρίς κριτήρια επιστρέφονται όλα τα ορατά προγράμματα, ταξινόμηση `startDate` → `name`.
 
 ### `GET /programs/{id}`
 
@@ -204,7 +204,7 @@ Responses:
 }
 ```
 
-Public tier (VISITOR, ή αυθεντικοποιημένος χρήστης χωρίς σχέση με αυτή την προβολή): `id`, `filmTitle`, `filmCast`, `filmGenres`, `auditoriumName`, `startTime`, `endTime`, `state`. Τα `reviewScore`, `reviewComments`, `rejectionReason`, `submitterId`, `handlerId`, `creationDate` αποκρύπτονται.
+Public tier (VISITOR, ή αυθεντικοποιημένος χρήστης χωρίς σχέση με αυτή την προβολή): `id`, `filmTitle`, `filmGenres`, `auditoriumName`, `startTime`, `endTime`, `state`. Τα `filmCast`, `reviewScore`, `reviewComments`, `rejectionReason`, `submitterId`, `handlerId`, `creationDate` αποκρύπτονται.
 
 ### `POST /programs/{pid}/screenings`
 
@@ -219,8 +219,9 @@ Responses:
 - `201 Created` → `ScreeningDTO` (`state = CREATED`, `endTime = null` μέχρι submit)
 - `400` — λείπει `filmTitle`
 - `401` — μη αυθεντικοποιημένος
-- `403` — ο caller είναι PROGRAMMER αυτού του προγράμματος (ΛΑ-1.7)
+- `403` — ο caller είναι PROGRAMMER ή STAFF αυτού του προγράμματος (διαχωρισμός ρόλων, ΛΑ-1.5/ΛΑ-1.7)
 - `404` — πρόγραμμα δεν υπάρχει
+- `409` — υπάρχει ήδη απολύτως ίδια προβολή του ίδιου SUBMITTER στο πρόγραμμα (προστασία από διπλή εκτέλεση/retry)
 
 ### `GET /programs/{pid}/screenings`
 
@@ -283,7 +284,7 @@ Responses:
 - `200 OK` → `ScreeningDTO` (`handlerId` ορισμένο)
 - `403` — requester δεν είναι PROGRAMMER
 - `404` — δεν υπάρχει, ή `userId` δεν είναι STAFF αυτού του προγράμματος
-- `409` — `program.state != ASSIGNMENT`, ή υπάρχει ήδη handler
+- `409` — `program.state != ASSIGNMENT`, το screening δεν είναι `SUBMITTED`, ή υπάρχει ήδη handler
 
 ### `POST /programs/{pid}/screenings/{id}/review`
 
@@ -333,7 +334,7 @@ Responses:
 - `200 OK` → `ScreeningDTO` (frozen)
 - `403` — requester δεν είναι ο SUBMITTER
 - `404` — δεν υπάρχει
-- `409` — `program.state != FINAL_SUBMISSION`, ή `screening.state != APPROVED`
+- `409` — `program.state != FINAL_SUBMISSION`, `screening.state != APPROVED`, ή έχει ήδη ολοκληρωθεί final submission (frozen)
 
 ### `POST /programs/{pid}/screenings/{id}/accept`
 

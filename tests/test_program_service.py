@@ -228,7 +228,12 @@ def test_add_staff_rejects_non_programmer_requester(db, user_factory, service):
 def test_search_programs_returns_all_when_no_criteria(db, user_factory, service):
     creator = user_factory(username="creator")
     service.create_program(_valid_data(name="Spring", startDate="2026-03-01"), creator)
-    service.create_program(_valid_data(name="Autumn", startDate="2026-09-01"), creator)
+    service.create_program(
+        _valid_data(
+            name="Autumn", startDate="2026-09-01", endDate="2026-12-01"
+        ),
+        creator,
+    )
 
     results = service.search_programs({}, creator)
 
@@ -285,7 +290,9 @@ def test_search_programs_filters_by_date_range(db, user_factory, service):
 def test_search_programs_redacts_for_outsider(db, user_factory, service):
     creator = user_factory(username="creator")
     outsider = user_factory(username="outsider")
-    service.create_program(_valid_data(), creator)
+    program = service.create_program(_valid_data(), creator)
+    program.state = ProgramState.ANNOUNCED
+    db.session.commit()
 
     results = service.search_programs({}, outsider)
 
@@ -323,6 +330,8 @@ def test_get_program_redacted_for_outsider(db, user_factory, service):
     creator = user_factory(username="creator")
     outsider = user_factory(username="outsider")
     program = service.create_program(_valid_data(), creator)
+    program.state = ProgramState.ANNOUNCED
+    db.session.commit()
 
     dto = service.get_program(program.id, outsider)
 
@@ -335,6 +344,8 @@ def test_get_program_redacted_for_outsider(db, user_factory, service):
 def test_get_program_redacted_for_anonymous_visitor(db, user_factory, service):
     creator = user_factory(username="creator")
     program = service.create_program(_valid_data(), creator)
+    program.state = ProgramState.ANNOUNCED
+    db.session.commit()
 
     dto = service.get_program(program.id, None)
 
