@@ -183,6 +183,12 @@ python run.py
 2. Εκτέλεση των `/programs` και `/programs/{id}/screenings` requests με το ίδιο cookie.
 3. `POST /auth/logout` για τερματισμό του session.
 
+Για αυτοματοποιημένο έλεγχο χωρίς Postman Environment, εισάγετε το
+[`postman/Cinema_API_Automated.postman_collection.json`](postman/Cinema_API_Automated.postman_collection.json)
+στο Postman και εκτελέστε ολόκληρη τη συλλογή με **Run collection**. Η συλλογή
+χρησιμοποιεί το σταθερό URL `http://127.0.0.1:5000` και αποθηκεύει τα δυναμικά
+IDs μόνο ως εσωτερικές collection variables.
+
 Έλεγχος όλου του συστήματος:
 
 ```powershell
