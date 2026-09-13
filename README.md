@@ -165,13 +165,17 @@ python -m venv venv
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 Copy-Item .env.example .env
-python init_db.py
+python init_db.py --seed-demo
 python run.py
 ```
 
 Το `init_db.py` δημιουργεί το schema και αναβαθμίζει παλαιότερη SQLite βάση με το
 `creator_id` που απαιτείται για την προστασία του αρχικού PROGRAMMER. Οι χρήστες
 αναμένονται ήδη στον κοινό πίνακα `users`, σύμφωνα με την παραδοχή της εκφώνησης.
+Η προαιρετική παράμετρος `--seed-demo` δημιουργεί, μόνο αν λείπουν, τους χρήστες
+`programmer`, `programmer2`, `staff` και `submitter`, όλους με κωδικό `Demo123!`,
+ώστε το πλήρες workflow να δοκιμάζεται άμεσα στο Postman. Δεν αλλάζει τον κωδικό
+ενός λογαριασμού που υπάρχει ήδη και προορίζεται μόνο για τοπική επίδειξη.
 
 Για Postman ή άλλο HTTP client:
 
