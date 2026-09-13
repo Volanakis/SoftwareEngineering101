@@ -1,4 +1,5 @@
 import logging
+import math
 from datetime import datetime, timedelta
 
 from app.extensions import db
@@ -20,6 +21,7 @@ logger = logging.getLogger(__name__)
 class ScreeningService:
 
     def create_screening(self, program_id, data, requester):
+        self._require_data_object(data)
         program = db.session.get(Program, program_id)
 
         if program is None:
@@ -28,29 +30,41 @@ class ScreeningService:
         if requester is None:
             raise AuthorizationError("Authentication is required")
 
-        if requester in program.programmers:
+        existing_role = ProgramRole.query.filter_by(
+            program_id=program.id,
+            user_id=requester.id,
+        ).first()
+
+        if existing_role is not None:
             raise AuthorizationError(
-                "A PROGRAMMER cannot submit a screening to their own program"
+                "A PROGRAMMER or STAFF member cannot submit a screening "
+                "to the same program"
             )
 
         film_title = data.get("filmTitle")
 
-        if not film_title:
-            raise ValidationError("Missing required field: filmTitle")
+        if not isinstance(film_title, str) or not film_title.strip():
+            raise ValidationError("filmTitle must be a non-empty string")
 
         screening = Screening(
-            program=program,
-            submitter=requester,
-            film_title=film_title,
+            program_id=program.id,
+            submitter_id=requester.id,
+            film_title=film_title.strip(),
         )
 
         if "filmCast" in data:
-            screening.film_cast = data["filmCast"]
+            screening.film_cast = self._optional_text(data["filmCast"], "filmCast")
 
         if "filmGenres" in data:
-            screening.film_genres = data["filmGenres"]
+            screening.film_genres = self._optional_text(
+                data["filmGenres"], "filmGenres"
+            )
 
         if "filmDurationMinutes" in data:
+            if isinstance(data["filmDurationMinutes"], bool):
+                raise ValidationError(
+                    "filmDurationMinutes must be an integer"
+                )
             try:
                 duration = int(data["filmDurationMinutes"])
             except (TypeError, ValueError):
@@ -66,12 +80,28 @@ class ScreeningService:
             screening.film_duration_minutes = duration
 
         if "auditoriumName" in data:
-            screening.auditorium_name = data["auditoriumName"]
+            screening.auditorium_name = self._optional_text(
+                data["auditoriumName"], "auditoriumName"
+            )
 
         if "startTime" in data:
             screening.start_time = self._parse_datetime(
                 data["startTime"]
             )
+
+        with db.session.no_autoflush:
+            duplicate = Screening.query.filter_by(
+                program_id=program.id,
+                submitter_id=requester.id,
+                film_title=screening.film_title,
+                film_cast=screening.film_cast,
+                film_genres=screening.film_genres,
+                film_duration_minutes=screening.film_duration_minutes,
+                auditorium_name=screening.auditorium_name,
+                start_time=screening.start_time,
+            ).first()
+        if duplicate is not None:
+            raise ConflictError("An identical screening submission already exists")
 
         db.session.add(screening)
         db.session.commit()
@@ -92,6 +122,7 @@ class ScreeningService:
         data,
         requester,
     ):
+        self._require_data_object(data)
         _, screening = self._get_program_and_screening(
             program_id,
             screening_id,
@@ -105,18 +136,24 @@ class ScreeningService:
             )
 
         if "filmTitle" in data:
-            if not data["filmTitle"]:
-                raise ValidationError("filmTitle cannot be empty")
+            if not isinstance(data["filmTitle"], str) or not data["filmTitle"].strip():
+                raise ValidationError("filmTitle must be a non-empty string")
 
-            screening.film_title = data["filmTitle"]
+            screening.film_title = data["filmTitle"].strip()
 
         if "filmCast" in data:
-            screening.film_cast = data["filmCast"]
+            screening.film_cast = self._optional_text(data["filmCast"], "filmCast")
 
         if "filmGenres" in data:
-            screening.film_genres = data["filmGenres"]
+            screening.film_genres = self._optional_text(
+                data["filmGenres"], "filmGenres"
+            )
 
         if "filmDurationMinutes" in data:
+            if isinstance(data["filmDurationMinutes"], bool):
+                raise ValidationError(
+                    "filmDurationMinutes must be an integer"
+                )
             try:
                 duration = int(data["filmDurationMinutes"])
             except (TypeError, ValueError):
@@ -132,7 +169,9 @@ class ScreeningService:
             screening.film_duration_minutes = duration
 
         if "auditoriumName" in data:
-            screening.auditorium_name = data["auditoriumName"]
+            screening.auditorium_name = self._optional_text(
+                data["auditoriumName"], "auditoriumName"
+            )
 
         if "startTime" in data:
             screening.start_time = self._parse_datetime(
@@ -253,6 +292,11 @@ class ScreeningService:
                 "Handler assignment is allowed only during ASSIGNMENT"
             )
 
+        if screening.state != ScreeningState.SUBMITTED:
+            raise ConflictError(
+                "A handler can only be assigned to a SUBMITTED screening"
+            )
+
         if screening.handler_id is not None:
             raise ConflictError(
                 "Screening already has a handler"
@@ -297,6 +341,7 @@ class ScreeningService:
         data,
         requester,
     ):
+        self._require_data_object(data)
         program, screening = self._get_program_and_screening(
             program_id,
             screening_id,
@@ -325,10 +370,13 @@ class ScreeningService:
                 "Missing required field: score"
             )
 
-        if not data.get("comments"):
+        if not isinstance(data.get("comments"), str) or not data["comments"].strip():
             raise ValidationError(
-                "Missing required field: comments"
+                "comments must be a non-empty string"
             )
+
+        if isinstance(data["score"], bool):
+            raise ValidationError("score must be numeric")
 
         try:
             score = float(data["score"])
@@ -337,8 +385,11 @@ class ScreeningService:
                 "score must be numeric"
             )
 
+        if not math.isfinite(score):
+            raise ValidationError("score must be a finite number")
+
         screening.review_score = score
-        screening.review_comments = data["comments"]
+        screening.review_comments = data["comments"].strip()
         screening.state = ScreeningState.REVIEWED
 
         db.session.commit()
@@ -359,6 +410,7 @@ class ScreeningService:
         data,
         requester,
     ):
+        self._require_data_object(data)
         program, screening = self._get_program_and_screening(
             program_id,
             screening_id,
@@ -376,7 +428,7 @@ class ScreeningService:
                 "Only a REVIEWED screening can be approved"
             )
 
-        screening.approval_notes = data.get("notes")
+        screening.approval_notes = self._optional_text(data.get("notes"), "notes")
         screening.state = ScreeningState.APPROVED
 
         db.session.commit()
@@ -396,6 +448,7 @@ class ScreeningService:
         data,
         requester,
     ):
+        self._require_data_object(data)
         program, screening = self._get_program_and_screening(
             program_id,
             screening_id,
@@ -405,9 +458,9 @@ class ScreeningService:
 
         reason = data.get("reason")
 
-        if not reason:
+        if not isinstance(reason, str) or not reason.strip():
             raise ValidationError(
-                "Missing required field: reason"
+                "reason must be a non-empty string"
             )
 
         if program.state not in {
@@ -426,7 +479,7 @@ class ScreeningService:
                 "Screening is already in a final state"
             )
 
-        screening.rejection_reason = reason
+        screening.rejection_reason = reason.strip()
         screening.state = ScreeningState.REJECTED
 
         db.session.commit()
@@ -447,6 +500,7 @@ class ScreeningService:
         data,
         requester,
     ):
+        self._require_data_object(data)
         program, screening = self._get_program_and_screening(
             program_id,
             screening_id,
@@ -467,21 +521,28 @@ class ScreeningService:
                 "Only an APPROVED screening can be finally submitted"
             )
 
+        if screening.final_submitted:
+            raise ConflictError("Screening has already been finally submitted and is frozen")
+
         if "filmTitle" in data:
-            if not data["filmTitle"]:
+            if not isinstance(data["filmTitle"], str) or not data["filmTitle"].strip():
                 raise ValidationError(
-                    "filmTitle cannot be empty"
+                    "filmTitle must be a non-empty string"
                 )
-            screening.film_title = data["filmTitle"]
+            screening.film_title = data["filmTitle"].strip()
 
         if "filmCast" in data:
-            screening.film_cast = data["filmCast"]
+            screening.film_cast = self._optional_text(data["filmCast"], "filmCast")
 
         if "filmGenres" in data:
-            screening.film_genres = data["filmGenres"]
+            screening.film_genres = self._optional_text(
+                data["filmGenres"], "filmGenres"
+            )
 
         if "auditoriumName" in data:
-            screening.auditorium_name = data["auditoriumName"]
+            screening.auditorium_name = self._optional_text(
+                data["auditoriumName"], "auditoriumName"
+            )
 
         if "startTime" in data:
             screening.start_time = self._parse_datetime(
@@ -807,7 +868,6 @@ class ScreeningService:
         return {
             "id": screening.id,
             "filmTitle": screening.film_title,
-            "filmCast": screening.film_cast,
             "filmGenres": screening.film_genres,
             "auditoriumName": screening.auditorium_name,
             "startTime": (
@@ -844,6 +904,17 @@ class ScreeningService:
             raise ValidationError(
                 "Invalid datetime format"
             )
+
+    def _optional_text(self, value, field_name):
+        if value is None:
+            return None
+        if not isinstance(value, str):
+            raise ValidationError(f"{field_name} must be a string")
+        return value.strip()
+
+    def _require_data_object(self, data):
+        if not isinstance(data, dict):
+            raise ValidationError("Screening data must be a JSON object")
 
 
 def _auto_reject_unsubmitted_screenings(program):

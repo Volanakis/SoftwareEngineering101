@@ -1,0 +1,372 @@
+{
+  "info": {
+    "_postman_id": "65126420-7128-4aaa-9af1-2a8eb3e41ec0",
+    "name": "Cinema API - Automated Full Workflow",
+    "description": "Runs the complete cinema workflow against http://127.0.0.1:5000. No Postman Environment is required. Dynamic IDs are stored as collection variables.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "staffId", "value": "" },
+    { "key": "programId", "value": "" },
+    { "key": "screeningId", "value": "" },
+    { "key": "runSuffix", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "01 - Health check",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('API is healthy', () => pm.response.to.have.status(200));",
+          "pm.expect(pm.response.json().status).to.eql('ok');"
+        ] }
+      }],
+      "request": { "method": "GET", "url": "http://127.0.0.1:5000/health" }
+    },
+    {
+      "name": "02 - Login staff and save staffId",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('Staff login succeeds', () => pm.response.to.have.status(200));",
+          "pm.collectionVariables.set('staffId', pm.response.json().id);"
+        ] }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"staff\",\n  \"password\": \"Demo123!\"\n}" },
+        "url": "http://127.0.0.1:5000/auth/login"
+      }
+    },
+    {
+      "name": "03 - Login programmer",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": ["pm.test('Programmer login succeeds', () => pm.response.to.have.status(200));"] }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"programmer\",\n  \"password\": \"Demo123!\"\n}" },
+        "url": "http://127.0.0.1:5000/auth/login"
+      }
+    },
+    {
+      "name": "04 - Create program and save programId",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": { "exec": ["pm.collectionVariables.set('runSuffix', Date.now().toString());"] }
+        },
+        {
+          "listen": "test",
+          "script": { "exec": [
+            "pm.test('Program created', () => pm.response.to.have.status(201));",
+            "const data = pm.response.json();",
+            "pm.expect(data.state).to.eql('CREATED');",
+            "pm.collectionVariables.set('programId', data.id);"
+          ] }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"name\": \"Automated Festival {{runSuffix}}\",\n  \"description\": \"Created automatically by the Postman Collection Runner\",\n  \"startDate\": \"2030-06-10\",\n  \"endDate\": \"2030-06-20\"\n}" },
+        "url": "http://127.0.0.1:5000/programs"
+      }
+    },
+    {
+      "name": "05 - Add staff to program",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": ["pm.test('Staff role added', () => pm.response.to.have.status(200));"] }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"userId\": \"{{staffId}}\",\n  \"roleType\": \"STAFF\"\n}" },
+        "url": "http://127.0.0.1:5000/programs/{{programId}}/roles"
+      }
+    },
+    {
+      "name": "06 - Login submitter",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": ["pm.test('Submitter login succeeds', () => pm.response.to.have.status(200));"] }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"submitter\",\n  \"password\": \"Demo123!\"\n}" },
+        "url": "http://127.0.0.1:5000/auth/login"
+      }
+    },
+    {
+      "name": "07 - Create screening and save screeningId",
+      "event": [{
+        "listen": "test",
+        "script": { "exec": [
+          "pm.test('Screening created', () => pm.response.to.have.status(201));",
+          "const data = pm.response.json();",
+          "pm.expect(data.state).to.eql('CREATED');",
+          "pm.collectionVariables.set('screeningId', data.id);"
+        ] }
+      }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"filmTitle\": \"The Automated Screening\",\n  \"filmCast\": \"Maria Example, Nikos Example\",\n  \"filmGenres\": \"Drama, Mystery\",\n  \"filmDurationMinutes\": 120,\n  \"auditoriumName\": \"Hall A\",\n  \"startTime\": \"2030-06-12T18:00:00Z\"\n}" },
+        "url": "http://127.0.0.1:5000/programs/{{programId}}/screenings"
+      }
+    },
+    {
+      "name": "08 - Login programmer",
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Programmer login succeeds', () => pm.response.to.have.status(200));"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"programmer\",\n  \"password\": \"Demo123!\"\n}" },
+        "url": "http://127.0.0.1:5000/auth/login"
+      }
+    },
+    {
+      "name": "09 - Program to SUBMISSION",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Program entered SUBMISSION', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().state).to.eql('SUBMISSION');"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"targetState\": \"SUBMISSION\"\n}" },
+        "url": "http://127.0.0.1:5000/programs/{{programId}}/transitions"
+      }
+    },
+    {
+      "name": "10 - Login submitter",
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Submitter login succeeds', () => pm.response.to.have.status(200));"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"submitter\",\n  \"password\": \"Demo123!\"\n}" },
+        "url": "http://127.0.0.1:5000/auth/login"
+      }
+    },
+    {
+      "name": "11 - Submit screening",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Screening submitted', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().state).to.eql('SUBMITTED');"
+      ] } }],
+      "request": { "method": "POST", "url": "http://127.0.0.1:5000/programs/{{programId}}/screenings/{{screeningId}}/submit" }
+    },
+    {
+      "name": "12 - Login programmer",
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Programmer login succeeds', () => pm.response.to.have.status(200));"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"programmer\",\n  \"password\": \"Demo123!\"\n}" },
+        "url": "http://127.0.0.1:5000/auth/login"
+      }
+    },
+    {
+      "name": "13 - Program to ASSIGNMENT",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Program entered ASSIGNMENT', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().state).to.eql('ASSIGNMENT');"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"targetState\": \"ASSIGNMENT\"\n}" },
+        "url": "http://127.0.0.1:5000/programs/{{programId}}/transitions"
+      }
+    },
+    {
+      "name": "14 - Assign handler",
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Handler assigned', () => pm.response.to.have.status(200));"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"userId\": \"{{staffId}}\"\n}" },
+        "url": "http://127.0.0.1:5000/programs/{{programId}}/screenings/{{screeningId}}/handler"
+      }
+    },
+    {
+      "name": "15 - Program to REVIEW",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Program entered REVIEW', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().state).to.eql('REVIEW');"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"targetState\": \"REVIEW\"\n}" },
+        "url": "http://127.0.0.1:5000/programs/{{programId}}/transitions"
+      }
+    },
+    {
+      "name": "16 - Login staff",
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Staff login succeeds', () => pm.response.to.have.status(200));"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"staff\",\n  \"password\": \"Demo123!\"\n}" },
+        "url": "http://127.0.0.1:5000/auth/login"
+      }
+    },
+    {
+      "name": "17 - Review screening",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Screening reviewed', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().state).to.eql('REVIEWED');"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"score\": 8.5,\n  \"comments\": \"Automated review passed successfully.\"\n}" },
+        "url": "http://127.0.0.1:5000/programs/{{programId}}/screenings/{{screeningId}}/review"
+      }
+    },
+    {
+      "name": "18 - Login programmer",
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Programmer login succeeds', () => pm.response.to.have.status(200));"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"programmer\",\n  \"password\": \"Demo123!\"\n}" },
+        "url": "http://127.0.0.1:5000/auth/login"
+      }
+    },
+    {
+      "name": "19 - Program to SCHEDULING",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Program entered SCHEDULING', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().state).to.eql('SCHEDULING');"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"targetState\": \"SCHEDULING\"\n}" },
+        "url": "http://127.0.0.1:5000/programs/{{programId}}/transitions"
+      }
+    },
+    {
+      "name": "20 - Approve screening",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Screening approved', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().state).to.eql('APPROVED');"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"notes\": \"Approved by automated Postman workflow.\"\n}" },
+        "url": "http://127.0.0.1:5000/programs/{{programId}}/screenings/{{screeningId}}/approve"
+      }
+    },
+    {
+      "name": "21 - Program to FINAL_SUBMISSION",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Program entered FINAL_SUBMISSION', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().state).to.eql('FINAL_SUBMISSION');"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"targetState\": \"FINAL_SUBMISSION\"\n}" },
+        "url": "http://127.0.0.1:5000/programs/{{programId}}/transitions"
+      }
+    },
+    {
+      "name": "22 - Login submitter",
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Submitter login succeeds', () => pm.response.to.have.status(200));"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"submitter\",\n  \"password\": \"Demo123!\"\n}" },
+        "url": "http://127.0.0.1:5000/auth/login"
+      }
+    },
+    {
+      "name": "23 - Final submit screening",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Final submission succeeds', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().state).to.eql('APPROVED');"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"auditoriumName\": \"Hall A\",\n  \"filmTitle\": \"The Automated Screening\",\n  \"filmCast\": \"Maria Example, Nikos Example\",\n  \"filmGenres\": \"Drama, Mystery\",\n  \"startTime\": \"2030-06-12T19:00:00Z\"\n}" },
+        "url": "http://127.0.0.1:5000/programs/{{programId}}/screenings/{{screeningId}}/final-submit"
+      }
+    },
+    {
+      "name": "24 - Login programmer",
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Programmer login succeeds', () => pm.response.to.have.status(200));"] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"username\": \"programmer\",\n  \"password\": \"Demo123!\"\n}" },
+        "url": "http://127.0.0.1:5000/auth/login"
+      }
+    },
+    {
+      "name": "25 - Program to DECISION",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Program entered DECISION', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().state).to.eql('DECISION');"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"targetState\": \"DECISION\"\n}" },
+        "url": "http://127.0.0.1:5000/programs/{{programId}}/transitions"
+      }
+    },
+    {
+      "name": "26 - Accept screening",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Screening accepted', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().state).to.eql('SCHEDULED');"
+      ] } }],
+      "request": { "method": "POST", "url": "http://127.0.0.1:5000/programs/{{programId}}/screenings/{{screeningId}}/accept" }
+    },
+    {
+      "name": "27 - Program to ANNOUNCED",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Program announced', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().state).to.eql('ANNOUNCED');"
+      ] } }],
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"targetState\": \"ANNOUNCED\"\n}" },
+        "url": "http://127.0.0.1:5000/programs/{{programId}}/transitions"
+      }
+    },
+    {
+      "name": "28 - Logout",
+      "event": [{ "listen": "test", "script": { "exec": ["pm.test('Logout succeeds', () => pm.response.to.have.status(204));"] } }],
+      "request": { "method": "POST", "url": "http://127.0.0.1:5000/auth/logout" }
+    },
+    {
+      "name": "29 - Public program view",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Announced program is public', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().state).to.eql('ANNOUNCED');",
+        "pm.expect(pm.response.json()).not.to.have.property('staff');"
+      ] } }],
+      "request": { "method": "GET", "url": "http://127.0.0.1:5000/programs/{{programId}}" }
+    },
+    {
+      "name": "30 - Public timetable",
+      "event": [{ "listen": "test", "script": { "exec": [
+        "pm.test('Public timetable loads', () => pm.response.to.have.status(200));",
+        "pm.expect(pm.response.json().results).to.be.an('array').that.is.not.empty;"
+      ] } }],
+      "request": { "method": "GET", "url": "http://127.0.0.1:5000/programs/{{programId}}/screenings?view=timetable" }
+    }
+  ]
+}

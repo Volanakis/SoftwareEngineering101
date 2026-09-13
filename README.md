@@ -30,8 +30,8 @@ Backend διαχείρισης κινηματογραφικών προγραμμ
 ## Κατάσταση Υλοποίησης (Τρίτο Μέρος)
 
 - ✅ **Person A — Διαχείριση Προγράμματος**: μοντέλα, service layer, state machine, Flask blueprint, tests — ολοκληρωμένο.
-- ✅ **Person B — Διαχείριση Προβολών**: `Screening` μοντέλο, service layer, redaction ανά ρόλο, αυτόματη απόρριψη στο DECISION (decision hook), 13 Flask endpoints, tests — ολοκληρωμένο. Η πλήρης σουίτα (160 tests) περνάει.
-- ✅ **Cross-cutting**: rate limiting (Flask-Limiter σε search + `submit` + `final-submit`, ρυθμιζόμενο storage backend)· logging & audit trail (`logs/app.log`, κάθε ενέργεια και των δύο services)· SQL scripts δημιουργίας βάσης (`sql/`)· τελικό integration pass (`tests/test_integration_lifecycle.py`)· test documentation ([`tests/TEST_PLAN.md`](tests/TEST_PLAN.md)). Πλήρης σουίτα: 170 tests, όλα πράσινα.
+- ✅ **Person B — Διαχείριση Προβολών**: `Screening` μοντέλο, service layer, redaction ανά ρόλο, αυτόματη απόρριψη στο DECISION (decision hook), 13 Flask endpoints, tests — ολοκληρωμένο.
+- ✅ **Cross-cutting**: authentication endpoints, rate limiting (Flask-Limiter σε search + `submit` + `final-submit`, ρυθμιζόμενο storage backend)· logging & audit trail (`logs/app.log`, κάθε ενέργεια και των δύο services)· SQL scripts δημιουργίας βάσης (`sql/`)· τελικό integration pass (`tests/test_integration_lifecycle.py`)· test documentation ([`tests/TEST_PLAN.md`](tests/TEST_PLAN.md)). Πλήρης σουίτα: 183 tests, όλα πράσινα.
 
 Πλήρης, ενημερωμένος καταμερισμός εργασιών: [`TASKS.md`](TASKS.md). Συμφωνημένο REST contract: [`API_CONTRACT.md`](API_CONTRACT.md). Οδηγός συνεργασίας/branching: [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
@@ -91,9 +91,9 @@ Backend διαχείρισης κινηματογραφικών προγραμμ
 - **ΛΑ-1.2** Το σύστημα αυθεντικοποιεί τον χρήστη ελέγχοντας τον συνδυασμό username/password έναντι της κοινής βάσης δεδομένων (η ίδια βάση εξυπηρετεί και το εξωτερικό User Management System).
 - **ΛΑ-1.3** Ένας μη αυθεντικοποιημένος χρήστης αντιμετωπίζεται ως **VISITOR**.
 - **ΛΑ-1.4** Ένας αυθεντικοποιημένος χρήστης χωρίς ρόλο σε συγκεκριμένο πρόγραμμα έχει τα ίδια δικαιώματα αναζήτησης/προβολής με τον VISITOR, επιπλέον της δυνατότητας δημιουργίας προγράμματος/προβολής (ρόλος **USER**).
-- **ΛΑ-1.5** Ένας χρήστης μπορεί να έχει το πολύ έναν ρόλο (**PROGRAMMER** ή **STAFF**) ανά συγκεκριμένο πρόγραμμα, αλλά διαφορετικούς ρόλους σε διαφορετικά προγράμματα.
+- **ΛΑ-1.5** Ένας χρήστης μπορεί να έχει το πολύ έναν ρόλο (**PROGRAMMER**, **STAFF** ή έμμεσο **SUBMITTER**) ανά συγκεκριμένο πρόγραμμα, αλλά διαφορετικούς ρόλους σε διαφορετικά προγράμματα.
 - **ΛΑ-1.6** Ο ρόλος **SUBMITTER** δεν είναι εγγεγραμμένος ρόλος του προγράμματος (PROGRAMMERS/STAFF) — προκύπτει έμμεσα από τη δημιουργία μιας προβολής (ο δημιουργός γίνεται αυτόματα SUBMITTER αυτής).
-- **ΛΑ-1.7** Ένας PROGRAMMER ενός προγράμματος δεν επιτρέπεται να υποβάλει προβολές (SUBMITTER) στο ίδιο πρόγραμμα, ώστε να διασφαλίζεται η αμεροληψία.
+- **ΛΑ-1.7** Ένας PROGRAMMER ή STAFF ενός προγράμματος δεν επιτρέπεται να υποβάλει προβολές (SUBMITTER) στο ίδιο πρόγραμμα, ενώ ένας υπάρχων SUBMITTER δεν μπορεί να προστεθεί ως PROGRAMMER/STAFF, ώστε να διασφαλίζεται η αμεροληψία.
 - **ΛΑ-1.8** Κάθε αίτημα προς οποιαδήποτε λειτουργία διαχείρισης ελέγχεται ως προς την εξουσιοδότηση του αιτούντος με βάση τον ρόλο του στο συγκεκριμένο πρόγραμμα/προβολή· μη εξουσιοδοτημένα αιτήματα απορρίπτονται με κατάλληλο μήνυμα σφάλματος.
 
 ### ΛΑ-2: Διαχείριση Προγράμματος (Season)
@@ -160,6 +160,47 @@ Backend διαχείρισης κινηματογραφικών προγραμμ
 - **ΜΛΑ-7 Τεχνολογικοί περιορισμοί**: η συνεργατική υλοποίηση πρέπει να πραγματοποιείται μέσω Git/ιδιωτικού GitHub repository, με χρήση εργαλείου διαχείρισης εξαρτήσεων/build (Poetry) και πλαισίου unit testing (pytest), σύμφωνα με τις απαιτήσεις του Τρίτου Μέρους της εργασίας.
 
 ---
+
+## Εκτέλεση και έλεγχος REST API
+
+```powershell
+python -m venv venv
+.\venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+Copy-Item .env.example .env
+python init_db.py --seed-demo
+python run.py
+```
+
+Το `init_db.py` δημιουργεί το schema και αναβαθμίζει παλαιότερη SQLite βάση με το
+`creator_id` που απαιτείται για την προστασία του αρχικού PROGRAMMER. Οι χρήστες
+αναμένονται ήδη στον κοινό πίνακα `users`, σύμφωνα με την παραδοχή της εκφώνησης.
+Η προαιρετική παράμετρος `--seed-demo` δημιουργεί, μόνο αν λείπουν, τους χρήστες
+`programmer`, `programmer2`, `staff` και `submitter`, όλους με κωδικό `Demo123!`,
+ώστε το πλήρες workflow να δοκιμάζεται άμεσα στο Postman. Δεν αλλάζει τον κωδικό
+ενός λογαριασμού που υπάρχει ήδη και προορίζεται μόνο για τοπική επίδειξη.
+
+Για Postman ή άλλο HTTP client:
+
+1. `POST /auth/login` με JSON `{"username":"...","password":"..."}` και διατήρηση του session cookie.
+2. Εκτέλεση των `/programs` και `/programs/{id}/screenings` requests με το ίδιο cookie.
+3. `POST /auth/logout` για τερματισμό του session.
+
+Για αυτοματοποιημένο έλεγχο χωρίς Postman Environment, εισάγετε το
+[`postman/Cinema_API_Automated.postman_collection.json`](postman/Cinema_API_Automated.postman_collection.json)
+στο Postman και εκτελέστε ολόκληρη τη συλλογή με **Run collection**. Η συλλογή
+χρησιμοποιεί το σταθερό URL `http://127.0.0.1:5000` και αποθηκεύει τα δυναμικά
+IDs μόνο ως εσωτερικές collection variables.
+
+Έλεγχος όλου του συστήματος:
+
+```powershell
+python -m pytest -q
+```
+
+Το regression suite καλύπτει authentication, authorization/role separation,
+visibility/redaction, validation, lifecycle transitions, searches, rate limiting,
+legacy schema migration και ολόκληρο το screening workflow.
 
 ## Διαγράμματα Σχεδίασης (Δεύτερο Μέρος)
 
