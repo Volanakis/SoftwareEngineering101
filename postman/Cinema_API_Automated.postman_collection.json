@@ -63,9 +63,9 @@
           "listen": "test",
           "script": { "exec": [
             "pm.test('Program created', () => pm.response.to.have.status(201));",
-            "const data = pm.response.json();",
-            "pm.expect(data.state).to.eql('CREATED');",
-            "pm.collectionVariables.set('programId', data.id);"
+            "const body04 = pm.response.json();",
+            "pm.expect(body04.state).to.eql('CREATED');",
+            "pm.collectionVariables.set('programId', body04.id);"
           ] }
         }
       ],
@@ -108,9 +108,9 @@
         "listen": "test",
         "script": { "exec": [
           "pm.test('Screening created', () => pm.response.to.have.status(201));",
-          "const data = pm.response.json();",
-          "pm.expect(data.state).to.eql('CREATED');",
-          "pm.collectionVariables.set('screeningId', data.id);"
+          "const body07 = pm.response.json();",
+          "pm.expect(body07.state).to.eql('CREATED');",
+          "pm.collectionVariables.set('screeningId', body07.id);"
         ] }
       }],
       "request": {
