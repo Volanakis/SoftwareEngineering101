@@ -30,8 +30,10 @@ CREATE TABLE IF NOT EXISTS programs (
     end_date      DATE         NOT NULL,
     creation_date DATETIME     NOT NULL,
     state         VARCHAR(16)  NOT NULL,
+    creator_id    VARCHAR(36),
     PRIMARY KEY (id),
     UNIQUE (name),
+    FOREIGN KEY (creator_id) REFERENCES users (id),
     CHECK (state IN (
         'CREATED', 'SUBMISSION', 'ASSIGNMENT', 'REVIEW',
         'SCHEDULING', 'FINAL_SUBMISSION', 'DECISION', 'ANNOUNCED'

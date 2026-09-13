@@ -18,6 +18,15 @@ screenings_bp = Blueprint(
 )
 
 
+def _json_object():
+    payload = request.get_json(silent=True)
+    if payload is None:
+        return {}
+    if not isinstance(payload, dict):
+        raise ValidationError("Request body must be a JSON object")
+    return payload
+
+
 @screenings_bp.errorhandler(ValidationError)
 def _handle_validation_error(error):
     return jsonify(error=str(error)), 400
@@ -83,9 +92,7 @@ def create_screening(program_id):
             error="Authentication required"
         ), 401
 
-    payload = request.get_json(
-        silent=True
-    ) or {}
+    payload = _json_object()
 
     screening = screening_service.create_screening(
         program_id,
@@ -131,9 +138,7 @@ def update_screening(
     program_id,
     screening_id,
 ):
-    payload = request.get_json(
-        silent=True
-    ) or {}
+    payload = _json_object()
 
     screening = screening_service.update_screening(
         program_id,
@@ -183,9 +188,7 @@ def assign_handler(
     program_id,
     screening_id,
 ):
-    payload = request.get_json(
-        silent=True
-    ) or {}
+    payload = _json_object()
 
     user_id = payload.get("userId")
 
@@ -211,9 +214,7 @@ def review_screening(
     program_id,
     screening_id,
 ):
-    payload = request.get_json(
-        silent=True
-    ) or {}
+    payload = _json_object()
 
     screening = screening_service.review_screening(
         program_id,
@@ -232,9 +233,7 @@ def approve_screening(
     program_id,
     screening_id,
 ):
-    payload = request.get_json(
-        silent=True
-    ) or {}
+    payload = _json_object()
 
     screening = screening_service.approve_screening(
         program_id,
@@ -253,9 +252,7 @@ def reject_screening(
     program_id,
     screening_id,
 ):
-    payload = request.get_json(
-        silent=True
-    ) or {}
+    payload = _json_object()
 
     screening = screening_service.reject_screening(
         program_id,
@@ -275,9 +272,7 @@ def final_submit_screening(
     program_id,
     screening_id,
 ):
-    payload = request.get_json(
-        silent=True
-    ) or {}
+    payload = _json_object()
 
     screening = screening_service.final_submit_screening(
         program_id,

@@ -8,6 +8,15 @@ from app.services.program_service import program_service
 programs_bp = Blueprint("programs", __name__, url_prefix="/programs")
 
 
+def _json_object():
+    payload = request.get_json(silent=True)
+    if payload is None:
+        return {}
+    if not isinstance(payload, dict):
+        raise ValidationError("Request body must be a JSON object")
+    return payload
+
+
 @programs_bp.errorhandler(ValidationError)
 def _handle_validation_error(error):
     return jsonify(error=str(error)), 400
@@ -35,7 +44,7 @@ def create_program():
     if user is None:
         return jsonify(error="Authentication required"), 401
 
-    payload = request.get_json(silent=True) or {}
+    payload = _json_object()
     program = program_service.create_program(payload, user)
     return jsonify(program_service.get_program(program.id, user)), 201
 
@@ -59,7 +68,7 @@ def get_program(program_id):
 def update_program(program_id):
     """ΛΑ-2.2, sequence 13."""
     user = get_current_user()
-    payload = request.get_json(silent=True) or {}
+    payload = _json_object()
     program = program_service.update_program(program_id, payload, user)
     return jsonify(program_service.get_program(program.id, user)), 200
 
@@ -75,7 +84,7 @@ def delete_program(program_id):
 def add_role(program_id):
     """ΛΑ-2.3 / ΛΑ-2.4, sequence 12."""
     user = get_current_user()
-    payload = request.get_json(silent=True) or {}
+    payload = _json_object()
     user_id = payload.get("userId")
     role_type = payload.get("roleType")
 
@@ -90,11 +99,18 @@ def add_role(program_id):
     return jsonify(program_service.get_program(program.id, user)), 200
 
 
+@programs_bp.delete("/<program_id>/roles/<user_id>")
+def remove_role(program_id, user_id):
+    """Remove a PROGRAMMER/STAFF assignment without removing the creator."""
+    program_service.remove_role(program_id, user_id, get_current_user())
+    return "", 204
+
+
 @programs_bp.post("/<program_id>/transitions")
 def transition_program(program_id):
     """ΛΑ-2.8, activity 06."""
     user = get_current_user()
-    payload = request.get_json(silent=True) or {}
+    payload = _json_object()
     target_state = payload.get("targetState")
 
     if not target_state:

@@ -30,3 +30,6 @@ instance/
 
 // Ignore pdf files
 *.pdf
+
+// Keep the private exam notes local
+POSTMAN_EXAM_CHEATSHEET_GR.txt

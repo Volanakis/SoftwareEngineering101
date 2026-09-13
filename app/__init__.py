@@ -35,6 +35,9 @@ def create_app(config_name=None):
 
     from app.blueprints.programs import programs_bp
     from app.blueprints.screenings import screenings_bp
+    from app.blueprints.auth import auth_bp
+
+    app.register_blueprint(auth_bp)
 
     app.register_blueprint(
         programs_bp
@@ -43,6 +46,24 @@ def create_app(config_name=None):
     app.register_blueprint(
         screenings_bp
     )
+
+    @app.errorhandler(404)
+    def not_found(_error):
+        return {"error": "Resource not found"}, 404
+
+    @app.errorhandler(405)
+    def method_not_allowed(_error):
+        return {"error": "Method not allowed"}, 405
+
+    @app.errorhandler(429)
+    def rate_limit_exceeded(_error):
+        return {"error": "Rate limit exceeded"}, 429
+
+    @app.errorhandler(500)
+    def internal_error(error):
+        db.session.rollback()
+        app.logger.exception("Unhandled server error", exc_info=error)
+        return {"error": "Internal server error"}, 500
 
     @app.get("/health")
     def health():

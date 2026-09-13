@@ -116,7 +116,7 @@ class Screening(db.Model):
 
     program = db.relationship(
         "Program",
-        backref="screenings",
+        back_populates="screenings",
     )
 
     submitter = db.relationship(

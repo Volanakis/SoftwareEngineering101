@@ -4,8 +4,8 @@
 καλύπτεται, με ποια test cases, υπό ποιες προϋποθέσεις, και πώς εκτελείται.
 
 - **Framework**: `pytest` (το Python-ισοδύναμο του JUnit που προτείνει το εκφώνημα).
-- **Σύνολο**: `pytest --collect-only -q` → **170 tests**, 15 αρχεία. Όλα πράσινα.
-- **Χρόνος εκτέλεσης**: ~25s (SQLite in-memory).
+- **Σύνολο**: `pytest --collect-only -q` → **183 tests**, 16 αρχεία. Όλα πράσινα.
+- **Χρόνος εκτέλεσης**: ~50s (SQLite in-memory).
 
 ## Πώς εκτελείται
 
@@ -27,8 +27,9 @@ pytest -k rate_limiting -q                   # ένα θέμα
 | `user_factory` | function | `make_user(username=None, password="password123", full_name=...)` — δημιουργεί & αποθηκεύει `User` με hashed password. |
 | `_reset_rate_limiter` | function, **autouse** | `limiter.reset()` πριν από κάθε test ώστε το process-global budget του Flask-Limiter να μη διαρρέει μεταξύ tests (ΜΛΑ-3.3). |
 
-Authentication στα HTTP tests γίνεται με `client.session_transaction()` (set/clear
-`sess["user_id"]`) — δεν χτυπιέται πραγματικό `/auth/login` endpoint.
+Τα περισσότερα HTTP tests προετοιμάζουν γρήγορα το session με
+`client.session_transaction()`. Τα πραγματικά `/auth/login` και `/auth/logout`
+endpoints ελέγχονται ξεχωριστά στο `test_final_fixes.py`.
 
 ## Κάλυψη ανά απαίτηση
 
@@ -80,13 +81,10 @@ Authentication στα HTTP tests γίνεται με `client.session_transaction
 | `test_integration_lifecycle.py` | HTTP E2E | 1 case — ένα πρόγραμμα, **τρεις** προβολές σε τρία διαφορετικά τερματικά αποτελέσματα (SCHEDULED / manual REJECTED / auto REJECTED) + έλεγχος audit trail + visitor redaction. |
 | `test_rate_limiting.py` | HTTP | 5 cases — 429 μετά το όριο σε `GET /programs`, `GET .../screenings`, `POST .../submit`, `POST .../final-submit`· μη-throttled endpoint δεν περιορίζεται. |
 | `test_sql_schema.py` | integration | 4 cases — το `sql/schema.sql` τρέχει σε καθαρή SQLite, columns/nullability ταιριάζουν με τα ORM models, `CHECK` constraints ενεργά, `drop_all.sql` καθαρίζει. |
-| `test_init_db.py` | integration | 1 case — `db.create_all()` παράγει και τους 4 πίνακες. |
+| `test_final_fixes.py` | regression/HTTP | Authentication endpoints, validation, visibility, nested filters, role separation και κρίσιμοι workflow guards. |
+| `test_init_db.py` | integration | Δημιουργία πινάκων, migration του `creator_id` και idempotent demo-user seed. |
 
 ## Τι ΔΕΝ καλύπτεται (γνωστά κενά)
 
-- Δεν υπάρχουν HTTP `/auth/login` · `/auth/logout` endpoints (το `API_CONTRACT.md` §2
-  τα ορίζει)· τα tests κάνουν login μέσω session cookie απευθείας.
-- `filmTitle` / `auditorium` φίλτρα στο `GET /programs` (εξαρτώνται από screenings)
-  γίνονται accept αλλά αγνοούνται — δεν υπάρχει test που να το επιβεβαιώνει ως μελλοντικό.
 - Το rate limiting χρησιμοποιεί in-memory storage· δεν δοκιμάζεται με shared backend (redis).
 - Δεν υπάρχει load/performance test για την ΜΛΑ-1 (5–10s ανά αίτημα).

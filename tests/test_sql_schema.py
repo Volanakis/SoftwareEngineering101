@@ -19,7 +19,7 @@ SQL_DIR = Path(__file__).resolve().parent.parent / "sql"
 @pytest.fixture
 def sql_conn():
     conn = sqlite3.connect(":memory:")
-    conn.executescript((SQL_DIR / "schema.sql").read_text())
+    conn.executescript((SQL_DIR / "schema.sql").read_text(encoding="utf-8"))
     yield conn
     conn.close()
 
@@ -74,7 +74,7 @@ def test_schema_sql_enforces_enum_check_constraints(sql_conn):
 
 
 def test_drop_all_sql_removes_tables(sql_conn):
-    sql_conn.executescript((SQL_DIR / "drop_all.sql").read_text())
+    sql_conn.executescript((SQL_DIR / "drop_all.sql").read_text(encoding="utf-8"))
     tables = {
         row[0]
         for row in sql_conn.execute(

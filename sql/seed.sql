@@ -16,10 +16,11 @@ INSERT INTO users (id, username, password_hash, full_name) VALUES
      'scrypt:32768:8:1$PLACEHOLDER_REPLACE_ME', 'Carol Staff');
 
 INSERT INTO programs
-    (id, name, description, start_date, end_date, creation_date, state) VALUES
+    (id, name, description, start_date, end_date, creation_date, state, creator_id) VALUES
     ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'Winter Season 2026',
      'Demonstration program', '2026-01-01', '2026-03-31',
-     '2026-01-01 09:00:00', 'CREATED');
+     '2026-01-01 09:00:00', 'CREATED',
+     '11111111-1111-1111-1111-111111111111');
 
 INSERT INTO program_roles (id, role_type, program_id, user_id) VALUES
     ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'PROGRAMMER',
