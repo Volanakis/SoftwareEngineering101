@@ -1,0 +1,25 @@
+$kind: http-request
+url: http://127.0.0.1:5000/programs/{{programId}}/screenings
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "filmTitle": "The Automated Screening",
+      "filmCast": "Maria Example, Nikos Example",
+      "filmGenres": "Drama, Mystery",
+      "filmDurationMinutes": 120,
+      "auditoriumName": "Hall A",
+      "startTime": "2030-06-12T18:00:00Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Screening created', () => pm.response.to.have.status(201));
+      const body07 = pm.response.json();
+      pm.expect(body07.state).to.eql('CREATED');
+      pm.collectionVariables.set('screeningId', body07.id);
+    language: text/javascript
+order: 7000

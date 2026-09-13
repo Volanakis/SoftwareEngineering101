@@ -2,6 +2,10 @@
 workspace:
   id: ee5aa409-50c4-44ee-8280-28e02ea810b4
 
+cloudResources:
+  collections:
+    ../postman/collections/Cinema API - Automated Full Workflow: 271b47e8-d6cf-4f27-9905-33accc2f264f
+
 # All resources in the `postman/` folder are automatically registered in Local View.
 # Point to additional files outside the `postman/` folder to register them individually. Example:
 #localResources:

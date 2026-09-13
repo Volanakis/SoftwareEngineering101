@@ -1,0 +1,7 @@
+$kind: collection
+description: Runs the complete cinema workflow against http://127.0.0.1:5000. No Postman Environment is required. Dynamic IDs are stored as collection variables.
+variables:
+  staffId: ""
+  programId: ""
+  screeningId: ""
+  runSuffix: ""

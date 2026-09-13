@@ -1,0 +1,17 @@
+$kind: http-request
+url: http://127.0.0.1:5000/auth/login
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "submitter",
+      "password": "Demo123!"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.test('Submitter login succeeds', () => pm.response.to.have.status(200));
+    language: text/javascript
+order: 22000

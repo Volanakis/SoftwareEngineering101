@@ -1,0 +1,19 @@
+$kind: http-request
+url: http://127.0.0.1:5000/programs/{{programId}}/screenings/{{screeningId}}/review
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "score": 8.5,
+      "comments": "Automated review passed successfully."
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Screening reviewed', () => pm.response.to.have.status(200));
+      pm.expect(pm.response.json().state).to.eql('REVIEWED');
+    language: text/javascript
+order: 17000

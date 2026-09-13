@@ -1,0 +1,18 @@
+$kind: http-request
+url: http://127.0.0.1:5000/programs/{{programId}}/transitions
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "targetState": "SUBMISSION"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Program entered SUBMISSION', () => pm.response.to.have.status(200));
+      pm.expect(pm.response.json().state).to.eql('SUBMISSION');
+    language: text/javascript
+order: 9000

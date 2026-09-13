@@ -1,0 +1,18 @@
+$kind: http-request
+url: http://127.0.0.1:5000/programs/{{programId}}/transitions
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "targetState": "REVIEW"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Program entered REVIEW', () => pm.response.to.have.status(200));
+      pm.expect(pm.response.json().state).to.eql('REVIEW');
+    language: text/javascript
+order: 15000

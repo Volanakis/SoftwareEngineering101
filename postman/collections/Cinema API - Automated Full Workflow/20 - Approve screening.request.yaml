@@ -1,0 +1,18 @@
+$kind: http-request
+url: http://127.0.0.1:5000/programs/{{programId}}/screenings/{{screeningId}}/approve
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "notes": "Approved by automated Postman workflow."
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Screening approved', () => pm.response.to.have.status(200));
+      pm.expect(pm.response.json().state).to.eql('APPROVED');
+    language: text/javascript
+order: 20000

@@ -1,0 +1,10 @@
+$kind: http-request
+url: http://127.0.0.1:5000/programs/{{programId}}/screenings/{{screeningId}}/accept
+method: POST
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Screening accepted', () => pm.response.to.have.status(200));
+      pm.expect(pm.response.json().state).to.eql('SCHEDULED');
+    language: text/javascript
+order: 26000

@@ -1,0 +1,22 @@
+$kind: http-request
+url: http://127.0.0.1:5000/programs/{{programId}}/screenings/{{screeningId}}/final-submit
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "auditoriumName": "Hall A",
+      "filmTitle": "The Automated Screening",
+      "filmCast": "Maria Example, Nikos Example",
+      "filmGenres": "Drama, Mystery",
+      "startTime": "2030-06-12T19:00:00Z"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test('Final submission succeeds', () => pm.response.to.have.status(200));
+      pm.expect(pm.response.json().state).to.eql('APPROVED');
+    language: text/javascript
+order: 23000

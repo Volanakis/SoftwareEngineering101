@@ -1,0 +1,26 @@
+$kind: http-request
+url: http://127.0.0.1:5000/programs
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "name": "Automated Festival {{runSuffix}}",
+      "description": "Created automatically by the Postman Collection Runner",
+      "startDate": "2030-06-10",
+      "endDate": "2030-06-20"
+    }
+scripts:
+  - type: beforeRequest
+    code: pm.collectionVariables.set('runSuffix', Date.now().toString());
+    language: text/javascript
+  - type: afterResponse
+    code: |-
+      pm.test('Program created', () => pm.response.to.have.status(201));
+      const body04 = pm.response.json();
+      pm.expect(body04.state).to.eql('CREATED');
+      pm.collectionVariables.set('programId', body04.id);
+    language: text/javascript
+order: 4000
