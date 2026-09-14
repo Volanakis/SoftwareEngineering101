@@ -53,6 +53,7 @@
 | 14 | Sequence: Προβολή προγράμματος | ✅ | `GET /programs/{id}` |
 | 15 | Sequence: Διαγραφή προγράμματος | ✅ | `DELETE /programs/{id}` |
 | 16 | Sequence: Προβολή προβολής | 🔲 | — |
+| 17 | ER diagram (αναλυτικό, relational) | ✅ αντιστοιχεί 1-1 στο `sql/schema.sql` | `sql/schema.sql`, `app/models/` |
 
 Ακριβές request/response σχήμα κάθε υλοποιημένου endpoint: [`API_CONTRACT.md`](../API_CONTRACT.md).
 
@@ -109,6 +110,7 @@
 | `14-sequence-program-view` | Sequence | Προβολή προγράμματος (redaction) |
 | `15-sequence-program-deletion` | Sequence | Διαγραφή προγράμματος |
 | `16-sequence-screening-view` | Sequence | Προβολή προβολής (redaction) |
+| `17-er-diagram-relational-schema` | ER Diagram | Σχεσιακό μοντέλο (αναλυτικό) |
 
 **Σημείωση για τα Mermaid `.md`**: το Mermaid δεν διαθέτει native τύπο για use case ή component diagrams, οπότε τα `02`, `03`, `04` αποδίδονται ως `flowchart` (actors/use cases ως κόμβοι, boundary ως subgraph), με αυτόματο layout. Τα `05` (class), και `11`–`16` (sequence) χρησιμοποιούν τους αντίστοιχους **native** τύπους του Mermaid (`classDiagram`, `sequenceDiagram` με πραγματικά `alt` fragments), ενώ τα activity diagrams `06`–`10` αποδίδονται ως `flowchart` με `subgraph` για τα διαδικά (swimlanes).
 
@@ -229,6 +231,10 @@ Actors: **Visitor**, **User**, **Submitter**, **Staff**, **Programmer** (οι τ
 **Σχέσεις**: `Program 1 —owns— 0..* Screening`, `User 1 —holds— 0..* ProgramRole —0..*— 1 Program`, `User 1 —submits (creator)— 0..* Screening` (υποχρεωτική — κάθε screening έχει ακριβώς έναν submitter), `User 0..1 —handles (STAFF)— 0..* Screening` (προαιρετική έως ότου γίνει η ανάθεση handler στη φάση ASSIGNMENT).
 
 Σημείωση εντός του διαγράμματος διευκρινίζει ότι ο ρόλος SUBMITTER **δεν** αποθηκεύεται στο ProgramRole (βλ. παραδοχή §0.4), παρά προκύπτει έμμεσα από τη σχέση `Screening.submitter`.
+
+### 5.2 ER Diagram (αναλυτικό) — `17-er-diagram-relational-schema.md`
+
+Σε αντίθεση με το class diagram `05` (domain/UML επίπεδο), αυτό το διάγραμμα δείχνει το **σχεσιακό μοντέλο** σε επίπεδο πινάκων: 4 πίνακες (`users`, `programs`, `program_roles`, `screenings`) με πλήρεις στήλες, primary/foreign/unique keys και cardinalities crow's-foot, ευθυγραμμισμένο 1-1 με το `sql/schema.sql`. Αναδεικνύει ρητά ποια FKs είναι προαιρετικά (`programs.creator_id`, `screenings.handler_id` — nullable) έναντι υποχρεωτικών, το composite unique constraint του `program_roles (program_id, user_id)`, και το `ON DELETE CASCADE` από `programs` προς `program_roles`/`screenings`.
 
 ---
 
